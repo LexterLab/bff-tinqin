@@ -4,8 +4,8 @@ import com.tinqinacademy.bff.api.createroom.CreateRoom;
 import com.tinqinacademy.bff.api.createroom.CreateRoomInput;
 import com.tinqinacademy.bff.api.createroom.CreateRoomOutput;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.exceptions.RoomNoAlreadyExistsException;
 import com.tinqinacademy.hotel.restexport.HotelClient;
+import feign.FeignException;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
@@ -41,12 +41,14 @@ public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
                     .roomId(output.getRoomId())
                     .build();
 
+
             log.info("End createRoom {}", output);
             return convertedOutput;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
-                        customCase(throwable, HttpStatus.BAD_REQUEST, RoomNoAlreadyExistsException.class ),
+//                        customCase(throwable, HttpStatus.BAD_REQUEST, FeignException.class),
+                        feignCase(throwable),
                         defaultCase(throwable)
                 ));
 
