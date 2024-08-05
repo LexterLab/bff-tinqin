@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @Builder
 @ToString
-public class CreateRoomInput implements OperationInput {
+public class CreateRoomOpInput implements OperationInput {
     @Schema(example = "private")
     @NotNull(message = "Field bathroomType must not be null")
     private BathroomType bathroomType;
