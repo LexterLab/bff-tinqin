@@ -1,9 +1,7 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.bff.api.createroom.CreateRoom;
-import com.tinqinacademy.bff.api.createroom.CreateRoomRequest;
-import com.tinqinacademy.bff.api.createroom.CreateRoomResponse;
-import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.hotel.api.errors.ErrorOutput;
+import com.tinqinacademy.hotel.api.operations.createroom.CreateRoom;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -26,29 +24,20 @@ public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
         this.client = client;
     }
 
+
     @Override
-    public Either<ErrorOutput, CreateRoomResponse> process(CreateRoomRequest input) {
-        log.info("Start createRoom {}", input);
-        return Try.of(() -> {
+    public Either<ErrorOutput, CreateRoomOutput> process(CreateRoomInput input) {
+       log.info("Start createRoom {}", input);
+       return Try.of(() -> {
             validateInput(input);
-            CreateRoomInput convertedInput = conversionService
-                    .convert(input, com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput.class);
-            CreateRoomOutput output = client
-                    .createRoom(convertedInput);
-
-            CreateRoomResponse convertedOutput = CreateRoomResponse
-                    .builder()
-                    .roomId(output.getRoomId())
-                    .build();
-
-            log.info("End createRoom {}", output);
-            return convertedOutput;
+            CreateRoomOutput output = client.createRoom(input);
+            log.info("End createRoom {}", input);
+            return output;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
                         feignCase(throwable),
                         defaultCase(throwable)
                 ));
-
     }
 }

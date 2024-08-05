@@ -2,11 +2,11 @@ package com.tinqinacademy.bff.core.processors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tinqinacademy.bff.api.base.OperationInput;
-import com.tinqinacademy.bff.api.errors.Error;
-import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.hotel.api.base.OperationInput;
+import com.tinqinacademy.hotel.api.errors.Error;
+import com.tinqinacademy.hotel.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.exceptions.FeignServiceException;
-import com.tinqinacademy.bff.api.exceptions.InputValidationException;
+import com.tinqinacademy.hotel.api.exceptions.InputValidationException;
 import feign.FeignException;
 import io.vavr.API;
 import jakarta.validation.ConstraintViolation;
