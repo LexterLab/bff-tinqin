@@ -5,6 +5,9 @@ import com.tinqinacademy.hotel.api.errors.ErrorOutput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoom;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
+import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoom;
+import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomInput;
+import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoom;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomInput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
@@ -25,6 +28,7 @@ public class SystemController  extends BaseController {
 
     private final CreateRoom createRoom;
     private final UpdateRoom updateRoom;
+    private final DeleteRoom deleteRoom;
 
     @Operation(
             summary = "Create Room Rest API",
@@ -61,6 +65,22 @@ public class SystemController  extends BaseController {
                 .roomNo(input.getRoomNo())
                 .price(input.getPrice())
                 .build());
+        return handleOutput(output, HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Delete Room Rest API",
+            description = "Delete Room Rest API is for deleting rooms"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    })
+    @DeleteMapping(RestAPIRoutes.DELETE_ROOM)
+    public ResponseEntity<?> deleteRoom(@PathVariable String roomId) {
+        Either<ErrorOutput, DeleteRoomOutput> output = deleteRoom.process(DeleteRoomInput.builder().roomId(roomId).build());
         return handleOutput(output, HttpStatus.OK);
     }
 }
