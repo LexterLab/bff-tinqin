@@ -51,6 +51,7 @@
         <hibernatecore.version>6.4.2.Final</hibernatecore.version>
         <jsonpatch.version>1.13</jsonpatch.version>
         <spring-boot-admin.version>3.3.2</spring-boot-admin.version>
+        <feignjackson.version>13.3</feignjackson.version>
     </properties>
 
     <dependencies>
