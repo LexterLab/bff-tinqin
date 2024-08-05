@@ -1,8 +1,8 @@
 package com.tinqinacademy.bff.core.processors;
 
 import com.tinqinacademy.bff.api.createroom.CreateRoom;
-import com.tinqinacademy.bff.api.createroom.CreateRoomOpInput;
-import com.tinqinacademy.bff.api.createroom.CreateRoomOpOutput;
+import com.tinqinacademy.bff.api.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.createroom.CreateRoomResponse;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
@@ -27,7 +27,7 @@ public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
     }
 
     @Override
-    public Either<ErrorOutput, CreateRoomOpOutput> process(CreateRoomOpInput input) {
+    public Either<ErrorOutput, CreateRoomResponse> process(CreateRoomRequest input) {
         log.info("Start createRoom {}", input);
         return Try.of(() -> {
             validateInput(input);
@@ -36,7 +36,7 @@ public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
             CreateRoomOutput output = client
                     .createRoom(convertedInput);
 
-            CreateRoomOpOutput convertedOutput = CreateRoomOpOutput
+            CreateRoomResponse convertedOutput = CreateRoomResponse
                     .builder()
                     .roomId(output.getRoomId())
                     .build();

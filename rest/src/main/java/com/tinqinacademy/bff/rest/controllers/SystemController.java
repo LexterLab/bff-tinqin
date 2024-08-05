@@ -1,8 +1,8 @@
 package com.tinqinacademy.bff.rest.controllers;
 
 import com.tinqinacademy.bff.api.createroom.CreateRoom;
-import com.tinqinacademy.bff.api.createroom.CreateRoomOpInput;
-import com.tinqinacademy.bff.api.createroom.CreateRoomOpOutput;
+import com.tinqinacademy.bff.api.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.createroom.CreateRoomResponse;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +35,8 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
     })
     @PostMapping(RestAPIRoutes.CREATE_ROOM)
-    public ResponseEntity<?> createRoom(@RequestBody CreateRoomOpInput input) {
-        Either<ErrorOutput, CreateRoomOpOutput> result = createRoom.process(input);
+    public ResponseEntity<?> createRoom(@RequestBody CreateRoomRequest input) {
+        Either<ErrorOutput, CreateRoomResponse> result = createRoom.process(input);
         return handleOutput(result, HttpStatus.CREATED);
     }
 }

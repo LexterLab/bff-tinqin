@@ -1,6 +1,6 @@
 package com.tinqinacademy.bff.core.converters.impl;
 
-import com.tinqinacademy.bff.api.createroom.CreateRoomOpInput;
+import com.tinqinacademy.bff.api.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.core.converters.AbstractConverter;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
 import com.tinqinacademy.hotel.api.enumerations.BedSize;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CreateRoomOpInputToCreateRoomInput extends AbstractConverter<CreateRoomOpInput, CreateRoomInput> {
+public class CreateRoomRequesstToCreateRoomInput extends AbstractConverter<CreateRoomRequest, CreateRoomInput> {
     @Override
     protected Class<CreateRoomInput> getTargetClass() {
         return CreateRoomInput.class;
     }
 
     @Override
-    protected CreateRoomInput doConvert(CreateRoomOpInput source) {
+    protected CreateRoomInput doConvert(CreateRoomRequest source) {
         CreateRoomInput target = CreateRoomInput
                 .builder()
                 .roomNo(source.getRoomNo())
@@ -29,7 +29,7 @@ public class CreateRoomOpInputToCreateRoomInput extends AbstractConverter<Create
         return target;
     }
 
-    private List<BedSize> convertBeds(CreateRoomOpInput source) {
+    private List<BedSize> convertBeds(CreateRoomRequest source) {
        List<BedSize> bedSizes = source.getBeds().stream()
                 .map(bedSize -> BedSize.getByCode(bedSize.toString()))
                 .toList();

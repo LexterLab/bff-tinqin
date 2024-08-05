@@ -9,6 +9,6 @@ import lombok.*;
 @Setter
 @Builder
 @ToString
-public class CreateRoomOpOutput implements OperationOutput {
+public class CreateRoomResponse implements OperationOutput {
     String roomId;
 }
