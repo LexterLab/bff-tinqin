@@ -13,6 +13,9 @@ import com.tinqinacademy.hotel.api.operations.getroom.GetRoomOutput;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoom;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomInput;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomOutput;
+import com.tinqinacademy.hotel.api.operations.unbookroom.UnbookRoom;
+import com.tinqinacademy.hotel.api.operations.unbookroom.UnbookRoomInput;
+import com.tinqinacademy.hotel.api.operations.unbookroom.UnbookRoomOutput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,6 +35,7 @@ public class HotelController extends BaseController {
     private final SearchRoom searchRoom;
     private final GetRoom getRoom;
     private final BookRoom bookRoom;
+    private final UnbookRoom unbookRoom;
 
     @GetMapping(RestAPIRoutes.SEARCH_ROOMS)
     public ResponseEntity<?> searchRooms(
@@ -93,5 +97,26 @@ public class HotelController extends BaseController {
                 .build());
 
         return handleOutput(output, HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Unbook Room By Id Rest API",
+            description = "Unbook Room By Id REST API is used for unbooking a room by id"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    }
+    )
+    @DeleteMapping(RestAPIRoutes.UNBOOK_ROOM)
+    public ResponseEntity<?> unbookRoom(@PathVariable String roomId, @RequestBody UnbookRoomInput input) {
+        Either<ErrorOutput, UnbookRoomOutput>  output = unbookRoom.process(UnbookRoomInput
+                .builder()
+                .roomId(roomId)
+                .userId(input.getUserId())
+                .build());
+        return handleOutput(output, HttpStatus.OK);
     }
 }
