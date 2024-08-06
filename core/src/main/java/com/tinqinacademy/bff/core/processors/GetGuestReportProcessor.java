@@ -1,10 +1,10 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReport;
-import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportInput;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReport;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportResponse;
 import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportOutput;
-import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuestOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
@@ -25,13 +25,13 @@ public class GetGuestReportProcessor extends BaseProcessor implements GetGuestRe
     }
 
     @Override
-    public Either<ErrorOutput, GetGuestReportOutput> process(GetGuestReportInput input) {
-        log.info("Start getGuestReport {}", input);
+    public Either<ErrorOutput, GetGuestReportResponse> process(GetGuestReportRequest request) {
+        log.info("Start getGuestReport {}", request);
         return  Try.of(() -> {
-            GetGuestReportOutput output = hotelClient.getGuestReport(input.getStartDate(), input.getEndDate(),
-                    input.getFirstName(), input.getLastName(), input.getPhoneNo(), input.getIdCardNo(),
-                    input.getIdCardValidity(), input.getIdCardIssueAuthority(), input.getIdCardIssueDate(),
-                    input.getRoomNo());
+            GetGuestReportOutput output = hotelClient.getGuestReport(request.getStartDate(), request.getEndDate(),
+                    request.getFirstName(), request.getLastName(), request.getPhoneNo(), request.getIdCardNo(),
+                    request.getIdCardValidity(), request.getIdCardIssueAuthority(), request.getIdCardIssueDate(),
+                    request.getRoomNo());
             log.info("End getGuestReport {}", output);
             return output;
       }).toEither()

@@ -1,7 +1,9 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.createroom.CreateRoom;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoom;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoomResponse;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -16,7 +18,7 @@ import static io.vavr.API.Match;
 
 @Service
 @Slf4j
-public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
+public class CreateRoomProcessor extends BaseProcessor implements CreateRoom {
     private final HotelClient client;
 
     public CreateRoomProcessor(ConversionService conversionService, Validator validator, HotelClient client) {
@@ -26,18 +28,28 @@ public class CreateRoomProcessor extends BaseProcessor  implements CreateRoom {
 
 
     @Override
-    public Either<ErrorOutput, CreateRoomOutput> process(CreateRoomInput input) {
-       log.info("Start createRoom {}", input);
-       return Try.of(() -> {
-            validateInput(input);
-            CreateRoomOutput output = client.createRoom(input);
-            log.info("End createRoom {}", input);
-            return output;
-        }).toEither()
+    public Either<ErrorOutput, CreateRoomResponse> process(CreateRoomRequest input) {
+        log.info("Start createRoom {}", input);
+        return Try.of(() -> {
+                    validateInput(input);
+                    CreateRoomInput convertedInput = conversionService
+                            .convert(input, com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput.class);
+                    CreateRoomOutput output = client
+                            .createRoom(convertedInput);
+
+                    CreateRoomResponse convertedOutput = CreateRoomResponse
+                            .builder()
+                            .roomId(output.getRoomId())
+                            .build();
+
+                    log.info("End createRoom {}", output);
+                    return convertedOutput;
+                }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
                         feignCase(throwable),
                         defaultCase(throwable)
                 ));
+
     }
 }

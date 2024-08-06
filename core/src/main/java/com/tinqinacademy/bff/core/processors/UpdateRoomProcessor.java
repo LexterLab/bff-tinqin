@@ -1,7 +1,10 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoom;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoom;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomResponse;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomInput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -25,13 +28,17 @@ public class UpdateRoomProcessor extends BaseProcessor implements UpdateRoom {
     }
 
     @Override
-    public Either<ErrorOutput, UpdateRoomOutput> process(UpdateRoomInput input) {
-        log.info("Start updateRoom {}", input);
+    public Either<ErrorOutput, UpdateRoomResponse> process(UpdateRoomRequest request) {
+        log.info("Start updateRoom {}", request);
        return Try.of(() -> {
-            validateInput(input);
+            validateInput(request);
+            UpdateRoomInput input = conversionService.convert(request, UpdateRoomInput.class);
             UpdateRoomOutput output = hotelClient.updateRoom(input.getRoomId(), input);
-            log.info("End updateRoom {}", output);
-            return output;
+            UpdateRoomResponse response =  UpdateRoomResponse.builder()
+                    .roomId(output.getRoomId())
+                    .build();
+            log.info("End updateRoom {}", response);
+            return response;
         }).toEither()
                .mapLeft(throwable -> Match(throwable).of(
                        validatorCase(throwable),

@@ -1,7 +1,9 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoom;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoom;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomResponse;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomInput;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -24,13 +26,15 @@ public class DeleteRoomProcessor extends BaseProcessor implements DeleteRoom {
     }
 
     @Override
-    public Either<ErrorOutput, DeleteRoomOutput> process(DeleteRoomInput input) {
-        log.info("Start deleteRoom {}", input);
+    public Either<ErrorOutput, DeleteRoomResponse> process(DeleteRoomRequest request) {
+        log.info("Start deleteRoom {}", request);
         return Try.of(() -> {
-            validateInput(input);
-            DeleteRoomOutput output = hotelClient.deleteRoom(input.getRoomId());
-            log.info("End deleteRoom {}", output);
-            return output;
+            validateInput(request);
+            String roomId = request.getRoomId();
+            DeleteRoomOutput output = hotelClient.deleteRoom(roomId);
+            DeleteRoomResponse response = DeleteRoomResponse.builder().build();
+            log.info("End deleteRoom {}", response);
+            return response;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),

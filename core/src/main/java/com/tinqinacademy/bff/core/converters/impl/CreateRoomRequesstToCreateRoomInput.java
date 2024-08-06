@@ -1,6 +1,6 @@
 package com.tinqinacademy.bff.core.converters.impl;
 
-import com.tinqinacademy.bff.api.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.core.converters.AbstractConverter;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
 import com.tinqinacademy.hotel.api.enumerations.BedSize;

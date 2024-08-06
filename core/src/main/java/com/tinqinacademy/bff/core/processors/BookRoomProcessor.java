@@ -1,7 +1,9 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.bookroom.BookRoom;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.bookroom.BookRoom;
+import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
+import com.tinqinacademy.bff.api.operations.bookroom.BookRoomResponse;
 import com.tinqinacademy.hotel.api.operations.bookroom.BookRoomInput;
 import com.tinqinacademy.hotel.api.operations.bookroom.BookRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -25,13 +27,15 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
     }
 
     @Override
-    public Either<ErrorOutput, BookRoomOutput> process(BookRoomInput input) {
-     log.info("Start bookRoom {}", input);
+    public Either<ErrorOutput, BookRoomResponse> process(BookRoomRequest request) {
+     log.info("Start bookRoom {}", request);
       return Try.of(() -> {
-          validateInput(input);
+          validateInput(request);
+          BookRoomInput input = conversionService.convert(request, BookRoomInput.class);
           BookRoomOutput output = hotelClient.bookRoom(input.getRoomId(), input);
-          log.info("End bookRoom {}", output);
-          return output;
+          BookRoomResponse response = BookRoomResponse.builder().build();
+          log.info("End bookRoom {}", response);
+          return response;
       }).toEither()
               .mapLeft(throwable -> Match(throwable).of(
                       validatorCase(throwable),
