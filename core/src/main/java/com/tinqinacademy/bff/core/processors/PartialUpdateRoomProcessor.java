@@ -1,7 +1,9 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoom;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoom;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomResponse;
 import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomInput;
 import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -24,12 +26,17 @@ public class PartialUpdateRoomProcessor extends BaseProcessor implements Partial
     }
 
     @Override
-    public Either<ErrorOutput, PartialUpdateRoomOutput> process(PartialUpdateRoomInput input) {
-        log.info("Start partialUpdateRoom {}", input);
+    public Either<ErrorOutput, PartialUpdateRoomResponse> process(PartialUpdateRoomRequest request) {
+        log.info("Start partialUpdateRoom {}", request);
         return Try.of(() -> {
-            PartialUpdateRoomOutput output = hotelClient.partialUpdateRoom(input.getRoomId(), input);
-            log.info("End partialUpdateRoom {}", output);
-            return output;
+            validateInput(request);
+            PartialUpdateRoomInput input = conversionService.convert(request, PartialUpdateRoomInput.class);
+            PartialUpdateRoomOutput output = hotelClient.partialUpdateRoom(request.getRoomId(), input);
+            PartialUpdateRoomResponse response = PartialUpdateRoomResponse.builder()
+                    .roomId(output.getRoomId())
+                    .build();
+            log.info("End partialUpdateRoom {}", response);
+            return response;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
