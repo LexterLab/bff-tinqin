@@ -14,6 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
     private final GetGuestReportOutputToGetGuestReportResponse getGuestReportOutputToGetGuestReportResponse;
     private final GetRoomOutputToGetRoomResponse getRoomOutputToGetRoomResponse;
     private final LeaveRoomCommentRequestToLeaveRoomCommentInput leaveRoomCommentRequestToLeaveRoomCommentInput;
+    private final PartialUpdateRequestToPartialUpdateInput partialUpdateRequestToPartialUpdateInput;
+    private final RegisterGuestRequestToRegisterGuestInput registerGuestRequestToRegisterGuestInput;
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(createRoomRequesstToCreateRoomInput);
@@ -21,5 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverter(getGuestReportOutputToGetGuestReportResponse);
         registry.addConverter(getRoomOutputToGetRoomResponse);
         registry.addConverter(leaveRoomCommentRequestToLeaveRoomCommentInput);
+        registry.addConverter(partialUpdateRequestToPartialUpdateInput);
+        registry.addConverter(registerGuestRequestToRegisterGuestInput);
     }
 }

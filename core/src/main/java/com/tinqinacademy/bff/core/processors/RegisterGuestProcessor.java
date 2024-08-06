@@ -1,7 +1,9 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuest;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuest;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestRequest;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestResponse;
 import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuestInput;
 import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuestOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -24,13 +26,15 @@ public class RegisterGuestProcessor extends BaseProcessor implements RegisterGue
     }
 
     @Override
-    public Either<ErrorOutput, RegisterGuestOutput> process(RegisterGuestInput input) {
-        log.info("Start registerGuest {}", input);
+    public Either<ErrorOutput, RegisterGuestResponse> process(RegisterGuestRequest request) {
+        log.info("Start registerGuest {}", request);
         return Try.of(() -> {
-            validateInput(input);
-            RegisterGuestOutput output = hotelClient.registerGuest(input, input.getBookingId());
+            validateInput(request);
+            RegisterGuestInput input = conversionService.convert(request, RegisterGuestInput.class);
+            RegisterGuestOutput output = hotelClient.registerGuest(input, request.getBookingId());
+            RegisterGuestResponse response = RegisterGuestResponse.builder().build();
             log.info("End registerGuest {}", output);
-            return output;
+            return response;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
