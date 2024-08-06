@@ -13,6 +13,17 @@
     <version>${revision}</version>
     <name>bff-tinqin</name>
     <description>bff-tinqin</description>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-dependencies</artifactId>
+                <version>${spring-boot-admin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <packaging>pom</packaging>
 
     <modules>
@@ -39,6 +50,8 @@
         <feign.version>4.1.3</feign.version>
         <hibernatecore.version>6.4.2.Final</hibernatecore.version>
         <jsonpatch.version>1.13</jsonpatch.version>
+        <spring-boot-admin.version>3.3.2</spring-boot-admin.version>
+        <feignjackson.version>13.3</feignjackson.version>
     </properties>
 
     <dependencies>
@@ -77,6 +90,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
         </dependency>
 
     </dependencies>
