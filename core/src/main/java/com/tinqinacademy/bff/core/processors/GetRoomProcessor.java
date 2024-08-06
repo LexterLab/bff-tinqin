@@ -27,6 +27,7 @@ public class GetRoomProcessor extends BaseProcessor implements GetRoom {
     public Either<ErrorOutput, GetRoomOutput> process(GetRoomInput input) {
         log.info("Start getRoom  {}", input);
         return Try.of(() -> {
+            validateInput(input);
            GetRoomOutput output = hotelClient.getRoomById(input.getRoomId());
            log.info("End getRoom  {}", output);
            return output;
