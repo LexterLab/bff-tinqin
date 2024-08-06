@@ -1,6 +1,7 @@
 package com.tinqinacademy.bff.domain.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tinqinacademy.comments.restexport.restexport.CommentClient;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import feign.Feign;
@@ -21,6 +22,7 @@ public class RestClientConfig {
     @Bean
     public HotelClient getClient() {
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         return Feign.builder()
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
@@ -30,6 +32,7 @@ public class RestClientConfig {
     @Bean
     public CommentClient getCommentClient() {
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         return Feign.builder()
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
