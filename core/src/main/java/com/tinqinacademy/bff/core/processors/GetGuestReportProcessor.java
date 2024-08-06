@@ -32,8 +32,9 @@ public class GetGuestReportProcessor extends BaseProcessor implements GetGuestRe
                     request.getFirstName(), request.getLastName(), request.getPhoneNo(), request.getIdCardNo(),
                     request.getIdCardValidity(), request.getIdCardIssueAuthority(), request.getIdCardIssueDate(),
                     request.getRoomNo());
-            log.info("End getGuestReport {}", output);
-            return output;
+            GetGuestReportResponse response = conversionService.convert(output, GetGuestReportResponse.class);
+            log.info("End getGuestReport {}", response);
+            return response;
       }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
