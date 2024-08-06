@@ -1,8 +1,11 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoom;
-import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomInput;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
+import com.tinqinacademy.bff.api.operations.searchroom.SearchRoom;
+import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
+import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomResponse;
+import com.tinqinacademy.hotel.api.enumerations.BathroomType;
+import com.tinqinacademy.hotel.api.enumerations.BedSize;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;
@@ -24,13 +27,21 @@ public class SearchRoomProcessor extends BaseProcessor implements SearchRoom {
     }
 
     @Override
-    public Either<ErrorOutput, SearchRoomOutput> process(SearchRoomInput input) {
-        log.info("Start searchRoom {}", input);
+    public Either<ErrorOutput, SearchRoomResponse> process(SearchRoomRequest request) {
+        log.info("Start searchRoom {}", request);
         return Try.of(() -> {
-            SearchRoomOutput output = hotelClient.searchAvailableRooms(input.getStartDate(), input.getEndDate(),
-                    input.getBedCount(), input.getBedSize(), input.getBathroomType());
-            log.info("End searchRoom {}", output);
-            return output;
+            SearchRoomOutput output = hotelClient.searchAvailableRooms(
+                    request.getStartDate(),
+                    request.getEndDate(),
+                    request.getBedCount(),
+                    request.getBedSize() == null ? null : BedSize.getByCode(request.getBedSize().toString()),
+                    request.getBathroomType() == null ? null : BathroomType.getByCode(request.getBathroomType().toString())
+            );
+            SearchRoomResponse response = SearchRoomResponse.builder()
+                    .roomIds(output.getRoomIds())
+                    .build();
+            log.info("End searchRoom {}", response);
+            return response;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
                         validatorCase(throwable),
