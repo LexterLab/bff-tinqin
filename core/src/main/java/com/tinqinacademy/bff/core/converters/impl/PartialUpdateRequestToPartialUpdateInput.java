@@ -1,7 +1,6 @@
 package com.tinqinacademy.bff.core.converters.impl;
 
 import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
-import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
 import com.tinqinacademy.bff.core.converters.AbstractConverter;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
 import com.tinqinacademy.hotel.api.enumerations.BedSize;
@@ -23,7 +22,7 @@ public class PartialUpdateRequestToPartialUpdateInput extends AbstractConverter<
                 .builder()
                 .roomId(source.getRoomId())
                 .beds(convertBeds(source))
-                .bathroomType(BathroomType.getByCode(source.getBathroomType().toString()))
+                .bathroomType(source.getBathroomType() == null ? null:BathroomType.getByCode(source.getBathroomType().toString()))
                 .floor(source.getFloor())
                 .roomNo(source.getRoomNo())
                 .price(source.getPrice())
@@ -32,8 +31,8 @@ public class PartialUpdateRequestToPartialUpdateInput extends AbstractConverter<
     }
 
     private List<BedSize> convertBeds(PartialUpdateRoomRequest source) {
-        List<com.tinqinacademy.hotel.api.enumerations.BedSize> bedSizes = source.getBeds().stream()
-                .map(bedSize -> BedSize.getByCode(bedSize.toString()))
+        List<BedSize> bedSizes = source.getBeds().stream()
+                .map(bedSize -> bedSize == null ? null : BedSize.getByCode(bedSize.toString()))
                 .toList();
         return bedSizes;
     }
