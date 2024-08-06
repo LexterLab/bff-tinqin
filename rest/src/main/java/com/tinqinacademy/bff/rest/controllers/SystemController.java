@@ -1,25 +1,25 @@
 package com.tinqinacademy.bff.rest.controllers;
 
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoom;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.operations.createroom.CreateRoomResponse;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoom;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomResponse;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReport;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportResponse;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoom;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomResponse;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuest;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestRequest;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestResponse;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoom;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomResponse;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
-import com.tinqinacademy.hotel.api.errors.ErrorOutput;
-import com.tinqinacademy.hotel.api.operations.createroom.CreateRoom;
-import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
-import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
-import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoom;
-import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomInput;
-import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
-import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReport;
-import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportInput;
-import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportOutput;
-import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoom;
-import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomInput;
-import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomOutput;
-import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuest;
-import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuestInput;
-import com.tinqinacademy.hotel.api.operations.registerguest.RegisterGuestOutput;
-import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoom;
-import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomInput;
-import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
+import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,8 +55,8 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
     })
     @PostMapping(RestAPIRoutes.CREATE_ROOM)
-    public ResponseEntity<?> createRoom(@RequestBody CreateRoomInput input) {
-        Either<ErrorOutput, CreateRoomOutput> result = createRoom.process(input);
+    public ResponseEntity<?> createRoom(@RequestBody CreateRoomRequest request) {
+        Either<ErrorOutput, CreateRoomResponse> result = createRoom.process(request);
         return handleOutput(result, HttpStatus.CREATED);
     }
 
@@ -71,14 +71,14 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND"),
     })
     @PutMapping(RestAPIRoutes.UPDATE_ROOM)
-    public ResponseEntity<?> updateRoom(@PathVariable String roomId, @RequestBody UpdateRoomInput input) {
-        Either<ErrorOutput, UpdateRoomOutput> output = updateRoom.process(UpdateRoomInput.builder()
+    public ResponseEntity<?> updateRoom(@PathVariable String roomId, @RequestBody UpdateRoomRequest request) {
+        Either<ErrorOutput, UpdateRoomResponse> output = updateRoom.process(UpdateRoomRequest.builder()
                 .roomId(roomId)
-                .bathroomType(input.getBathroomType())
-                .floor(input.getFloor())
-                .beds(input.getBeds())
-                .roomNo(input.getRoomNo())
-                .price(input.getPrice())
+                .bathroomType(request.getBathroomType())
+                .floor(request.getFloor())
+                .beds(request.getBeds())
+                .roomNo(request.getRoomNo())
+                .price(request.getPrice())
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }
@@ -94,14 +94,14 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND"),
     })
     @PatchMapping(RestAPIRoutes.PARTIAL_UPDATE_ROOM)
-    public ResponseEntity<?> partialUpdateRoom(@PathVariable String roomId, @RequestBody PartialUpdateRoomInput input) {
-        Either<ErrorOutput, PartialUpdateRoomOutput> output = partialUpdateRoom.process(PartialUpdateRoomInput.builder()
+    public ResponseEntity<?> partialUpdateRoom(@PathVariable String roomId, @RequestBody PartialUpdateRoomRequest request) {
+        Either<ErrorOutput, PartialUpdateRoomResponse> output = partialUpdateRoom.process(PartialUpdateRoomRequest.builder()
                 .roomId(roomId)
-                .beds(input.getBeds())
-                .bathroomType(input.getBathroomType())
-                .floor(input.getFloor())
-                .roomNo(input.getRoomNo())
-                .price(input.getPrice())
+                .beds(request.getBeds())
+                .bathroomType(request.getBathroomType())
+                .floor(request.getFloor())
+                .roomNo(request.getRoomNo())
+                .price(request.getPrice())
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }
@@ -118,7 +118,8 @@ public class SystemController  extends BaseController {
     })
     @DeleteMapping(RestAPIRoutes.DELETE_ROOM)
     public ResponseEntity<?> deleteRoom(@PathVariable String roomId) {
-        Either<ErrorOutput, DeleteRoomOutput> output = deleteRoom.process(DeleteRoomInput.builder().roomId(roomId).build());
+        Either<ErrorOutput, DeleteRoomResponse> output = deleteRoom.process(DeleteRoomRequest.builder()
+                .roomId(roomId).build());
         return handleOutput(output, HttpStatus.OK);
     }
 
@@ -133,13 +134,13 @@ public class SystemController  extends BaseController {
     })
     @PostMapping(RestAPIRoutes.REGISTER_VISITOR)
     public ResponseEntity<?> register(
-            @RequestBody RegisterGuestInput input,
+            @RequestBody RegisterGuestRequest request,
             @PathVariable String bookingId
     ) {
-        Either<ErrorOutput, RegisterGuestOutput> output = registerGuest.process(RegisterGuestInput
+        Either<ErrorOutput, RegisterGuestResponse> output = registerGuest.process(RegisterGuestRequest
                 .builder()
                 .bookingId(bookingId)
-                .guests(input.getGuests())
+                .guests(request.getGuests())
                 .build());
         return handleOutput(output, HttpStatus.CREATED);
     }
@@ -167,7 +168,7 @@ public class SystemController  extends BaseController {
             @RequestParam(required = false) String roomNo
 
     ) {
-        Either<ErrorOutput, GetGuestReportOutput> output = getGuestReport.process(GetGuestReportInput.builder()
+        Either<ErrorOutput, GetGuestReportResponse> output = getGuestReport.process(GetGuestReportRequest.builder()
                 .idCardIssueAuthority(idCardAuthority)
                 .idCardIssueDate(idCardIssueDate)
                 .idCardNo(idCardNo)
