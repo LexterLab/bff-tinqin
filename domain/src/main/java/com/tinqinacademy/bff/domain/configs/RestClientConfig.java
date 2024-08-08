@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.User;
 
+
 @Configuration
 public class RestClientConfig {
     @Value("${hotel.client.url}")
@@ -25,6 +26,7 @@ public class RestClientConfig {
 
     @Value("${authentication.client.url}")
     private String authenticationURL;
+
 
     @Bean
     public HotelClient getClient() {
@@ -45,6 +47,7 @@ public class RestClientConfig {
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(CommentClient.class, commentsURL);
     }
+
 
     @Bean
     public AuthenticationClient getAuthenticationClient() {
