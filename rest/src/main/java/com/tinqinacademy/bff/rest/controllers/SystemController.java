@@ -23,11 +23,13 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -55,6 +57,10 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
     })
     @PostMapping(RestAPIRoutes.CREATE_ROOM)
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     public ResponseEntity<?> createRoom(@RequestBody CreateRoomRequest request) {
         Either<ErrorOutput, CreateRoomResponse> result = createRoom.process(request);
         return handleOutput(result, HttpStatus.CREATED);
