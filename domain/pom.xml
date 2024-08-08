@@ -22,6 +22,11 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>com.tinqinacademy.authentication</groupId>
+            <artifactId>restexport</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-jackson</artifactId>
             <version>${feignjackson.version}</version>
