@@ -1,14 +1,15 @@
 package com.tinqinacademy.bff.core.jwt;
 
 import com.tinqinacademy.authentication.api.operations.generateaccesstoken.GetUsernameFromTokenInput;
+import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserDetailsInput;
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenInput;
+import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenOutput;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -27,7 +28,6 @@ import java.io.IOException;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationClient authenticationClient;
-    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -39,14 +39,21 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 .accessToken(token)
                 .build();
 
-        if (StringUtils.hasText(token) && authenticationClient.validateToken(input).isSuccess()) {
+        ValidateAccessTokenOutput validationOutput = authenticationClient.validateToken(input);
+        Boolean success = validationOutput.getSuccess();
+
+        if (StringUtils.hasText(token) && success) {
 
             GetUsernameFromTokenInput tokenInput = GetUsernameFromTokenInput.builder()
                     .token(token)
                     .build();
 
             String username = authenticationClient.getUsernameFromToken(tokenInput).getUsername();
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            LoadUserDetailsInput userDetailsInput = LoadUserDetailsInput
+                    .builder()
+                    .username(username)
+                    .build();
+            UserDetails userDetails = authenticationClient.loadUserDetails(userDetailsInput).getUserDetails();
 
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
