@@ -2,6 +2,7 @@ package com.tinqinacademy.bff.domain.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.comments.restexport.restexport.CommentClient;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import feign.Feign;
@@ -16,8 +17,11 @@ public class RestClientConfig {
     @Value("${hotel.client.url}")
     private String hotelURL;
 
-    @Value("{comments.client.url}")
+    @Value("${comments.client.url}")
     private String commentsURL;
+
+    @Value("${authentication.client.url}")
+    private String authenticationURL;
 
     @Bean
     public HotelClient getClient() {
@@ -37,5 +41,15 @@ public class RestClientConfig {
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(CommentClient.class, commentsURL);
+    }
+
+    @Bean
+    public AuthenticationClient getAuthenticationClient() {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return Feign.builder()
+                .encoder(new JacksonEncoder(objectMapper))
+                .decoder(new JacksonDecoder(objectMapper))
+                .target(AuthenticationClient.class, authenticationURL);
     }
 }
