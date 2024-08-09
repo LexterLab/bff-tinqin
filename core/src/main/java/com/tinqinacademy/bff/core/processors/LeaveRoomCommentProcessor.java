@@ -1,5 +1,7 @@
 package com.tinqinacademy.bff.core.processors;
 
+import com.tinqinacademy.authentication.api.operations.getuser.GetUserOutput;
+import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomComment;
 import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentRequest;
@@ -14,6 +16,8 @@ import io.vavr.control.Try;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import static io.vavr.API.Match;
@@ -23,17 +27,25 @@ import static io.vavr.API.Match;
 public class LeaveRoomCommentProcessor extends BaseProcessor implements LeaveRoomComment {
     private final HotelClient hotelClient;
     private final CommentClient commentClient;
+    private final AuthenticationClient authenticationClient;
     public LeaveRoomCommentProcessor(ConversionService conversionService, Validator validator, HotelClient hotelClient,
-                                     CommentClient commentClient) {
+                                     CommentClient commentClient, AuthenticationClient authenticationClient) {
         super(conversionService, validator);
         this.hotelClient = hotelClient;
         this.commentClient = commentClient;
+        this.authenticationClient = authenticationClient;
     }
 
     @Override
     public Either<ErrorOutput, LeaveRoomCommentResponse> process(LeaveRoomCommentRequest request) {
         log.info("Start leaveRoomComment {}", request);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
         return Try.of(() -> {
+            validateInput(request);
+            GetUserOutput userOutput = authenticationClient.getUser(username);
+
             GetRoomOutput roomOutput = hotelClient.getRoomById(request.getRoomId());
             LeaveRoomCommentInput input = conversionService.convert(request, LeaveRoomCommentInput.class);
             LeaveRoomCommentOutput output = commentClient.leaveRoomComment(String.valueOf(roomOutput.getId()), input);
