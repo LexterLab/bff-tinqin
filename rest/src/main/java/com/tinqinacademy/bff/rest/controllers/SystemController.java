@@ -122,6 +122,10 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
     })
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     @DeleteMapping(RestAPIRoutes.DELETE_ROOM)
     public ResponseEntity<?> deleteRoom(@PathVariable String roomId) {
         Either<ErrorOutput, DeleteRoomResponse> output = deleteRoom.process(DeleteRoomRequest.builder()
