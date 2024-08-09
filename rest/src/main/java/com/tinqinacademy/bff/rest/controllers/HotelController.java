@@ -1,11 +1,15 @@
 package com.tinqinacademy.bff.rest.controllers;
 
+import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoom;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomResponse;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoom;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoomRequest;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoomResponse;
+import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomComments;
+import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsRequest;
+import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsResponse;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoom;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomResponse;
@@ -36,6 +40,7 @@ public class HotelController extends BaseController {
     private final GetRoom getRoom;
     private final BookRoom bookRoom;
     private final UnbookRoom unbookRoom;
+    private final GetRoomComments getRoomComments;
 
     @GetMapping(RestAPIRoutes.SEARCH_ROOMS)
     public ResponseEntity<?> searchRooms(
@@ -116,6 +121,26 @@ public class HotelController extends BaseController {
                 .builder()
                 .roomId(roomId)
                 .userId(request.getUserId())
+                .build());
+        return handleOutput(output, HttpStatus.OK);
+    }
+
+
+    @Operation(
+            summary = "Get Room comments By Id Rest API",
+            description = "Get Room comments By Id REST API is used for retrieving room comments from a room by id"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    }
+    )
+    @GetMapping(RestRoutes.GET_ROOM_COMMENTS)
+    public ResponseEntity<?> getRoomComments(@PathVariable String roomId) {
+        Either<ErrorOutput, GetRoomCommentsResponse> output =  getRoomComments.process(GetRoomCommentsRequest
+                .builder()
+                        .roomId(roomId)
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }
