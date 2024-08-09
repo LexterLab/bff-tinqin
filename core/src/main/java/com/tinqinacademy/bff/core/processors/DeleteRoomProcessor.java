@@ -33,7 +33,7 @@ public class DeleteRoomProcessor extends BaseProcessor implements DeleteRoom {
             String roomId = request.getRoomId();
             DeleteRoomOutput output = hotelClient.deleteRoom(roomId);
             DeleteRoomResponse response = DeleteRoomResponse.builder().build();
-            log.info("End deleteRoom {}", response);
+            log.info("End deleteRoom {}", output);
             return response;
         }).toEither()
                 .mapLeft(throwable -> Match(throwable).of(
