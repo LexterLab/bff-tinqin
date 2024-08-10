@@ -10,6 +10,7 @@ import com.tinqinacademy.hotel.restexport.HotelClient;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import feign.okhttp.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +28,17 @@ public class RestClientConfig {
     @Value("${authentication.client.url}")
     private String authenticationURL;
 
+    @Bean
+    public OkHttpClient client() {
+        return new OkHttpClient();
+    }
 
     @Bean
     public HotelClient getClient() {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         return Feign.builder()
+                .client(new OkHttpClient())
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(HotelClient.class, hotelURL);
@@ -43,6 +49,7 @@ public class RestClientConfig {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         return Feign.builder()
+                .client(new OkHttpClient())
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(CommentClient.class, commentsURL);
@@ -57,6 +64,7 @@ public class RestClientConfig {
         module.addDeserializer(User.class, new UserDeserializer());
         objectMapper.registerModule(module);
         return Feign.builder()
+                .client(new OkHttpClient())
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(AuthenticationClient.class, authenticationURL);
