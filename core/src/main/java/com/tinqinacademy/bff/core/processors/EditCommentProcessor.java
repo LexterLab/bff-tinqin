@@ -1,6 +1,5 @@
 package com.tinqinacademy.bff.core.processors;
 
-import com.tinqinacademy.authentication.api.operations.getuser.GetUserInput;
 import com.tinqinacademy.authentication.api.operations.getuser.GetUserOutput;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
@@ -67,8 +66,8 @@ public class EditCommentProcessor extends BaseProcessor implements EditComment {
     private String getAuthenticatedUser() {
         log.info("Start getAuthenticatedUser");
 
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = "domino222";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
         log.info("End getAuthenticatedUser {}", username);
         return username;

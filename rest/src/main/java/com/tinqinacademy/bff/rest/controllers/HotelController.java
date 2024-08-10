@@ -13,6 +13,9 @@ import com.tinqinacademy.bff.api.operations.getroom.GetRoomResponse;
 import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomComments;
 import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsRequest;
 import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsResponse;
+import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomComment;
+import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentRequest;
+import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentResponse;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoom;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomResponse;
@@ -47,6 +50,7 @@ public class HotelController extends BaseController {
     private final UnbookRoom unbookRoom;
     private final GetRoomComments getRoomComments;
     private final EditComment editComment;
+    private final LeaveRoomComment leaveRoomComment;
 
     @GetMapping(RestAPIRoutes.SEARCH_ROOMS)
     public ResponseEntity<?> searchRooms(
@@ -175,5 +179,32 @@ public class HotelController extends BaseController {
                 .content(request.getContent())
                 .build());
         return handleOutput(output, HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Leave Room comment Rest API",
+            description = "Leave Room comment  REST API is used for leaving a comment for a room"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "201", description = "HTTP STATUS 201 CREATED"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "401", description = "HTTP STATUS 401 UNAUTHORIZED"),
+            @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    }
+    )
+    @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PostMapping(RestRoutes.LEAVE_COMMENT)
+    public ResponseEntity<?> leaveComment(@PathVariable String roomId, @RequestBody LeaveRoomCommentRequest request) {
+        Either<ErrorOutput, LeaveRoomCommentResponse> output = leaveRoomComment.process(LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .content(request.getContent())
+                .build());
+        return handleOutput(output, HttpStatus.CREATED);
     }
 }
