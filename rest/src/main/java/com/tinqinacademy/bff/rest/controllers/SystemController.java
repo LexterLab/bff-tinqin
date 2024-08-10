@@ -7,6 +7,9 @@ import com.tinqinacademy.bff.api.operations.createroom.CreateRoomResponse;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoom;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomResponse;
+import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomComment;
+import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomCommentRequest;
+import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomCommentResponse;
 import com.tinqinacademy.bff.api.operations.editusercomment.EditUserComment;
 import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentRequest;
 import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentResponse;
@@ -51,6 +54,7 @@ public class SystemController  extends BaseController {
     private final RegisterGuest registerGuest;
     private final GetGuestReport getGuestReport;
     private final EditUserComment editUserComment;
+    private final DeleteRoomComment deleteRoomComment;
 
     @Operation(
             summary = "Create Room Rest API",
@@ -228,6 +232,29 @@ public class SystemController  extends BaseController {
                         .lastName(request.getLastName())
                         .roomNo(request.getRoomNo())
                         .build());
+        return handleOutput(output, HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Delete Comment Rest API",
+            description = "Delete Comment  Rest API is used to delete room comments"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "401", description = "HTTP STATUS 401 UNAUTHORIZED"),
+            @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @DeleteMapping(RestRoutes.DELETE_COMMENT)
+    public ResponseEntity<?> deleteComment(@PathVariable String commentId) {
+        Either<ErrorOutput, DeleteRoomCommentResponse> output = deleteRoomComment.process(DeleteRoomCommentRequest.builder()
+                .commentId(commentId)
+                .build());
         return handleOutput(output, HttpStatus.OK);
     }
 

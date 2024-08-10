@@ -8,4 +8,5 @@ public class RestRoutes {
     public static final String EDIT_COMMENT = HOTEL +  "/comment/{commentId}";
     public static final String LEAVE_COMMENT = HOTEL +  "/{roomId}/comment";
     public static final String EDIT_USER_COMMENT = SYSTEM +  "/comment/{commentId}";
+    public static final String DELETE_COMMENT = SYSTEM +  "/comment/{commentId}";
 }
