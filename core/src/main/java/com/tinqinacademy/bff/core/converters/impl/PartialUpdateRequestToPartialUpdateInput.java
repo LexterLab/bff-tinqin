@@ -22,7 +22,7 @@ public class PartialUpdateRequestToPartialUpdateInput extends AbstractConverter<
                 .builder()
                 .roomId(source.getRoomId())
                 .beds(convertBeds(source))
-                .bathroomType(source.getBathroomType() == null ? null:BathroomType.getByCode(source.getBathroomType().toString()))
+                .bathroomType(source.getBathroomType() == null ? null : BathroomType.getByCode(source.getBathroomType().toString()))
                 .floor(source.getFloor())
                 .roomNo(source.getRoomNo())
                 .price(source.getPrice())

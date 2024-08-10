@@ -4,6 +4,9 @@ import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoom;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomResponse;
+import com.tinqinacademy.bff.api.operations.editcomment.EditComment;
+import com.tinqinacademy.bff.api.operations.editcomment.EditCommentRequest;
+import com.tinqinacademy.bff.api.operations.editcomment.EditCommentResponse;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoom;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoomRequest;
 import com.tinqinacademy.bff.api.operations.getroom.GetRoomResponse;
@@ -23,11 +26,13 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -41,6 +46,7 @@ public class HotelController extends BaseController {
     private final BookRoom bookRoom;
     private final UnbookRoom unbookRoom;
     private final GetRoomComments getRoomComments;
+    private final EditComment editComment;
 
     @GetMapping(RestAPIRoutes.SEARCH_ROOMS)
     public ResponseEntity<?> searchRooms(
@@ -138,9 +144,35 @@ public class HotelController extends BaseController {
     )
     @GetMapping(RestRoutes.GET_ROOM_COMMENTS)
     public ResponseEntity<?> getRoomComments(@PathVariable String roomId) {
-        Either<ErrorOutput, GetRoomCommentsResponse> output =  getRoomComments.process(GetRoomCommentsRequest
+        Either<ErrorOutput, GetRoomCommentsResponse> output = getRoomComments.process(GetRoomCommentsRequest
                 .builder()
                         .roomId(roomId)
+                .build());
+        return handleOutput(output, HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Edit Room comment By Id Rest API",
+            description = "Edit Room comment By Id REST API is used for updating a comment's content by the user"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "401", description = "HTTP STATUS 401 UNAUTHORIZED"),
+            @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
+            @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
+    }
+    )
+    @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    @PatchMapping(RestRoutes.EDIT_COMMENT)
+    public ResponseEntity<?> editComment(@PathVariable String commentId, @RequestBody EditCommentRequest request) {
+        Either<ErrorOutput, EditCommentResponse> output = editComment.process(EditCommentRequest
+                .builder()
+                .commentId(commentId)
+                .content(request.getContent())
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }

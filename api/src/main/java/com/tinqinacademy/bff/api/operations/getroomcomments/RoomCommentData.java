@@ -23,5 +23,5 @@ public class RoomCommentData {
     private LocalDateTime publishDate;
     private LocalDateTime lastEditedDate;
     @Schema(example = "George Russell")
-    private String lastEditedBy;
+    private UUID lastEditedBy;
 }

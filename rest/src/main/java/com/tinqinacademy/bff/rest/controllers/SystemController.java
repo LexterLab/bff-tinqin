@@ -99,6 +99,10 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND"),
     })
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     @PatchMapping(RestAPIRoutes.PARTIAL_UPDATE_ROOM)
     public ResponseEntity<?> partialUpdateRoom(@PathVariable String roomId, @RequestBody PartialUpdateRoomRequest request) {
         Either<ErrorOutput, PartialUpdateRoomResponse> output = partialUpdateRoom.process(PartialUpdateRoomRequest.builder()
