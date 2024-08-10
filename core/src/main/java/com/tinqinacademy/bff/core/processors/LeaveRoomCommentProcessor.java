@@ -39,15 +39,18 @@ public class LeaveRoomCommentProcessor extends BaseProcessor implements LeaveRoo
     @Override
     public Either<ErrorOutput, LeaveRoomCommentResponse> process(LeaveRoomCommentRequest request) {
         log.info("Start leaveRoomComment {}", request);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
 
         return Try.of(() -> {
             validateInput(request);
+
+            String username = getAuthenticatedUser();
             GetUserOutput userOutput = authenticationClient.getUser(username);
 
             GetRoomOutput roomOutput = hotelClient.getRoomById(request.getRoomId());
+
             LeaveRoomCommentInput input = conversionService.convert(request, LeaveRoomCommentInput.class);
+            input.setUserId(userOutput.getId().toString());
+
             LeaveRoomCommentOutput output = commentClient.leaveRoomComment(String.valueOf(roomOutput.getId()), input);
             LeaveRoomCommentResponse response = LeaveRoomCommentResponse
                     .builder()
@@ -62,4 +65,15 @@ public class LeaveRoomCommentProcessor extends BaseProcessor implements LeaveRoo
                         defaultCase(throwable)
                 ));
     }
+
+    private String getAuthenticatedUser() {
+        log.info("Start getAuthenticatedUser");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        log.info("End getAuthenticatedUser {}", username);
+        return username;
+    }
+
 }
