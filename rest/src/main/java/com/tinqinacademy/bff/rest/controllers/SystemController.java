@@ -84,7 +84,11 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND"),
-    })
+    }
+    )@PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     @PutMapping(RestAPIRoutes.UPDATE_ROOM)
     public ResponseEntity<?> updateRoom(@PathVariable String roomId, @RequestBody UpdateRoomRequest request) {
         Either<ErrorOutput, UpdateRoomResponse> output = updateRoom.process(UpdateRoomRequest.builder()
