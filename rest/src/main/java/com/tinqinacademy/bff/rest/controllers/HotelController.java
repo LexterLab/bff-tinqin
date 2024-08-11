@@ -126,11 +126,10 @@ public class HotelController extends BaseController {
     }
     )
     @DeleteMapping(RestAPIRoutes.UNBOOK_ROOM)
-    public ResponseEntity<?> unbookRoom(@PathVariable String roomId, @RequestBody UnbookRoomRequest request) {
+    public ResponseEntity<?> unbookRoom(@PathVariable String bookingId) {
         Either<ErrorOutput, UnbookRoomResponse>  output = unbookRoom.process(UnbookRoomRequest
                 .builder()
-                .roomId(roomId)
-                .userId(request.getUserId())
+                .bookingId(bookingId)
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }
