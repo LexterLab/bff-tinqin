@@ -40,7 +40,4 @@ public class BookRoomRequest implements OperationInput {
     @NotEmpty(message = "Field phoneNo should not be empty")
     @Pattern(regexp = "^\\+[1-9][0-9]{3,14}$")
     private String phoneNo;
-    @UUID(message = "Field userId must be UUID")
-    @NotBlank(message = "Field userId must not be blank")
-    private String userId;
 }
