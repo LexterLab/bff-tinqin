@@ -115,22 +115,26 @@ public class HotelController extends BaseController {
     }
 
     @Operation(
-            summary = "Unbook Room By Id Rest API",
-            description = "Unbook Room By Id REST API is used for unbooking a room by id"
+            summary = "Unbook Room By Booking Id Rest API",
+            description = "Unbook Room By Booking Id REST API is used for unbooking a room by booking id"
     )
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
             @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
+            @ApiResponse(responseCode = "401", description = "HTTP STATUS 401 UNAUTHORIZED"),
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
             @ApiResponse(responseCode = "404", description = "HTTP STATUS 404 NOT FOUND")
     }
     )
+    @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     @DeleteMapping(RestAPIRoutes.UNBOOK_ROOM)
-    public ResponseEntity<?> unbookRoom(@PathVariable String roomId, @RequestBody UnbookRoomRequest request) {
+    public ResponseEntity<?> unbookRoom(@PathVariable String bookingId) {
         Either<ErrorOutput, UnbookRoomResponse>  output = unbookRoom.process(UnbookRoomRequest
                 .builder()
-                .roomId(roomId)
-                .userId(request.getUserId())
+                .bookingId(bookingId)
                 .build());
         return handleOutput(output, HttpStatus.OK);
     }

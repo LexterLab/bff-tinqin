@@ -16,8 +16,5 @@ public class UnbookRoomRequest implements OperationInput {
     @JsonIgnore
     @UUID(message = "Field roomId must be UUID")
     @NotBlank(message = "Field roomId must not be blank")
-    private String roomId;
-    @UUID(message = "Field userId must be UUID")
-    @NotBlank(message = "Field userId must not be blank")
-    private String userId;
+    private String bookingId;
 }
