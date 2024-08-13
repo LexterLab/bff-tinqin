@@ -21,18 +21,18 @@ public class PartialUpdateRequestToPartialUpdateInput extends AbstractConverter<
         PartialUpdateRoomInput target = PartialUpdateRoomInput
                 .builder()
                 .roomId(source.getRoomId())
-                .beds(convertBeds(source))
+                .beds(source.getBeds() == null ? null : convertBeds(source))
                 .bathroomType(source.getBathroomType() == null ? null : BathroomType.getByCode(source.getBathroomType().toString()))
-                .floor(source.getFloor())
-                .roomNo(source.getRoomNo())
-                .price(source.getPrice())
+                .floor(source.getFloor() == null ? null : source.getFloor())
+                .roomNo(source.getRoomNo() == null ? null : source.getRoomNo())
+                .price(source.getPrice() == null ? null : source.getPrice())
                 .build();
         return target;
     }
 
     private List<BedSize> convertBeds(PartialUpdateRoomRequest source) {
         List<BedSize> bedSizes = source.getBeds().stream()
-                .map(bedSize -> bedSize == null ? null : BedSize.getByCode(bedSize.toString()))
+                .map(bedSize -> BedSize.getByCode(bedSize.toString()))
                 .toList();
         return bedSizes;
     }
