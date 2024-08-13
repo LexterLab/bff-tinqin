@@ -185,6 +185,10 @@ public class SystemController  extends BaseController {
             @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST"),
             @ApiResponse(responseCode = "403", description = "HTTP STATUS 403 FORBIDDEN"),
     })
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
     @GetMapping(RestAPIRoutes.GET_VISITORS_REPORT)
     public ResponseEntity<?> getGuestReport(
             @RequestParam(required = false) LocalDateTime startDate,
