@@ -52,6 +52,16 @@ public class HotelController extends BaseController {
     private final EditComment editComment;
     private final LeaveRoomComment leaveRoomComment;
 
+
+    @Operation(
+            summary = "Search Available rooms Id Rest API",
+            description = "Search Available rooms REST API is used for retrieving a room by id"
+    )
+    @ApiResponses( value = {
+            @ApiResponse(responseCode = "200", description = "HTTP STATUS 200 SUCCESS"),
+            @ApiResponse(responseCode = "400", description = "HTTP STATUS 400 BAD REQUEST")
+    }
+    )
     @GetMapping(RestAPIRoutes.SEARCH_ROOMS)
     public ResponseEntity<?> searchRooms(
             @RequestParam() LocalDateTime startDate,
