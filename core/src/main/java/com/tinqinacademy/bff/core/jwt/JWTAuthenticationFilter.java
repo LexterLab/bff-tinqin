@@ -32,6 +32,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
         String token = getTokenFromRequest(request);
 
         ValidateAccessTokenInput input = ValidateAccessTokenInput
@@ -39,10 +40,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 .accessToken(token)
                 .build();
 
-        ValidateAccessTokenOutput validationOutput = authenticationClient.validateToken(input);
-        Boolean success = validationOutput.getSuccess();
+        if (StringUtils.hasText(token) && authenticationClient.validateToken(input).getSuccess()) {
 
-        if (StringUtils.hasText(token) && success) {
 
             GetUsernameFromTokenInput tokenInput = GetUsernameFromTokenInput.builder()
                     .token(token)

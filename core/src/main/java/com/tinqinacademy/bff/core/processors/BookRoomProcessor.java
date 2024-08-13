@@ -1,5 +1,7 @@
 package com.tinqinacademy.bff.core.processors;
 
+import com.tinqinacademy.authentication.api.operations.getuser.GetUserOutput;
+import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoom;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
@@ -12,6 +14,8 @@ import io.vavr.control.Try;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import static io.vavr.API.Match;
@@ -20,10 +24,13 @@ import static io.vavr.API.Match;
 @Slf4j
 public class BookRoomProcessor extends BaseProcessor implements BookRoom {
     private final HotelClient hotelClient;
+    private final AuthenticationClient authenticationClient;
 
-    public BookRoomProcessor(ConversionService conversionService, Validator validator, HotelClient hotelClient) {
+    public BookRoomProcessor(ConversionService conversionService, Validator validator, HotelClient hotelClient,
+                             AuthenticationClient authenticationClient) {
         super(conversionService, validator);
         this.hotelClient = hotelClient;
+        this.authenticationClient = authenticationClient;
     }
 
     @Override
@@ -31,7 +38,12 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
      log.info("Start bookRoom {}", request);
       return Try.of(() -> {
           validateInput(request);
+
+          GetUserOutput userOutput = authenticationClient.getUser(getAuthenticatedUser());
+
           BookRoomInput input = conversionService.convert(request, BookRoomInput.class);
+          input.setUserId(userOutput.getId().toString());
+
           BookRoomOutput output = hotelClient.bookRoom(input.getRoomId(), input);
           BookRoomResponse response = BookRoomResponse.builder().build();
           log.info("End bookRoom {}", response);
@@ -42,5 +54,15 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
                       feignCase(throwable),
                       defaultCase(throwable)
               ));
+    }
+
+    private String getAuthenticatedUser() {
+        log.info("Start getAuthenticatedUser");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        log.info("End getAuthenticatedUser {}", username);
+        return username;
     }
 }

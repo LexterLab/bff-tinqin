@@ -35,7 +35,6 @@ public class GetGuestReportOutputToGetGuestReportResponse extends AbstractConver
                                .endDate(guestOutput.getEndDate())
                                .lastName(guestOutput.getLastName())
                                .firstName(guestOutput.getFirstName())
-                               .phoneNo(guestOutput.getPhoneNo())
                                .idCardNo(guestOutput.getIdCardNo())
                                .idCardValidity(guestOutput.getIdCardValidity())
                                .idCardIssueAuthority(guestOutput.getIdCardIssueAuthority())

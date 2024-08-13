@@ -1,4 +1,4 @@
-package com.tinqinacademy.bff.api.operations.unbookroom;
+package com.tinqinacademy.bff.api.operations.getroomcomments;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tinqinacademy.bff.api.base.OperationInput;
@@ -8,13 +8,13 @@ import org.hibernate.validator.constraints.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
 @Builder
 @ToString
-public class UnbookRoomRequest implements OperationInput {
-    @JsonIgnore
+public class GetRoomCommentsRequest implements OperationInput {
     @UUID(message = "Field roomId must be UUID")
     @NotBlank(message = "Field roomId must not be blank")
-    private String bookingId;
+    @JsonIgnore
+    private String roomId;
 }
