@@ -42,6 +42,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token) && authenticationClient.validateToken(input).getSuccess()) {
 
+
             GetUsernameFromTokenInput tokenInput = GetUsernameFromTokenInput.builder()
                     .token(token)
                     .build();

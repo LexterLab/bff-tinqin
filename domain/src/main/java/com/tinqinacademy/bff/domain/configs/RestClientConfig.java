@@ -74,6 +74,7 @@ public class RestClientConfig {
     public AuthenticationClient getAuthenticationClient() {
         return Feign.builder()
                 .client(new OkHttpClient())
+
                 .encoder(new JacksonEncoder(objectMapper))
                 .decoder(new JacksonDecoder(objectMapper))
                 .target(AuthenticationClient.class, authenticationURL);
