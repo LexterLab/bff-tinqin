@@ -1,7 +1,6 @@
 package com.tinqinacademy.bff.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tinqinacademy.authentication.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.authentication.api.operations.generateaccesstoken.GetUsernameFromTokenOutput;
 import com.tinqinacademy.authentication.api.operations.getuser.GetUserOutput;
 import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserDetailsInput;
@@ -9,7 +8,11 @@ import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserD
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenInput;
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenOutput;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
+import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
+import com.tinqinacademy.comments.api.operations.getroomcomments.GetRoomCommentsOutput;
+import com.tinqinacademy.comments.api.operations.getroomcomments.RoomCommentOutput;
+import com.tinqinacademy.comments.restexport.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
 import com.tinqinacademy.hotel.api.enumerations.BedSize;
@@ -22,8 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +55,9 @@ class HotelControllerTest {
 
     @MockBean
     private AuthenticationClient authenticationClient;
+
+    @MockBean
+    private CommentClient commentClient;
 
     @Test
     void shouldRespondWithRoomDataAndOkStatus() throws Exception {
@@ -180,7 +184,7 @@ class HotelControllerTest {
 
     @Test
     void shouldRespondWithUnauthorizedWhenBookingRoomWithInvalidToken() throws Exception {
-        String roomId = "invalid";
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
 
         BookRoomRequest request = BookRoomRequest
                 .builder()
@@ -223,7 +227,7 @@ class HotelControllerTest {
 
     @Test
     void shouldRespondWithForbiddenWhenBookingRoomWithInsufficientRole() throws Exception {
-        String roomId = "invalid";
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
 
         BookRoomRequest request = BookRoomRequest
                 .builder()
@@ -262,5 +266,55 @@ class HotelControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithOKAndRoomComments() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        RoomCommentOutput commentData = RoomCommentOutput
+                .builder()
+                .id(UUID.fromString(roomId))
+                .content("Content")
+                .firstName("George")
+                .lastName("Russell")
+                .publishDate(LocalDateTime.now())
+                .build();
+
+        GetRoomOutput roomOutput = GetRoomOutput
+                .builder()
+                .bedCount(1)
+                .price(BigDecimal.valueOf(20000))
+                .floor(4)
+                .bedSizes(List.of(BedSize.SINGLE))
+                .bathroomType(BathroomType.PRIVATE)
+                .datesOccupied(List.of())
+                .id(UUID.fromString(roomId))
+                .build();
+
+        GetRoomCommentsOutput expectedOutput = GetRoomCommentsOutput
+                .builder()
+                .roomComments(List.of(commentData))
+                .build();
+
+        when(hotelClient.getRoomById(roomId)).thenReturn(roomOutput);
+        when(commentClient.getRoomComments(roomId)).thenReturn(expectedOutput);
+
+        mockMvc.perform(get(RestRoutes.GET_ROOM_COMMENTS, roomId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomComments").isNotEmpty())
+                .andExpect(jsonPath("$.roomComments").isArray())
+                .andExpect(jsonPath("$.roomComments[0].id").value(expectedOutput.getRoomComments().getFirst().getId().toString()))
+                .andExpect(jsonPath("$.roomComments[0].content").value(expectedOutput.getRoomComments().getFirst().getContent()))
+                .andExpect(jsonPath("$.roomComments[0].firstName").value(expectedOutput.getRoomComments().getFirst().getFirstName()))
+                .andExpect(jsonPath("$.roomComments[0].lastName").value(expectedOutput.getRoomComments().getFirst().getLastName()));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestAndRoomCommentsWhenProvidedInvalidRoomId() throws Exception {
+        String roomId = "invalid";
+
+        mockMvc.perform(get(RestRoutes.GET_ROOM_COMMENTS, roomId))
+                .andExpect(status().isBadRequest());
     }
 }
