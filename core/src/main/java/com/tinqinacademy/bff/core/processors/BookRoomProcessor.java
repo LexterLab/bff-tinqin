@@ -46,7 +46,7 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
 
           BookRoomOutput output = hotelClient.bookRoom(input.getRoomId(), input);
           BookRoomResponse response = BookRoomResponse.builder().build();
-          log.info("End bookRoom {}", response);
+          log.info("End bookRoom {}", output);
           return response;
       }).toEither()
               .mapLeft(throwable -> Match(throwable).of(
