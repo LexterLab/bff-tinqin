@@ -47,7 +47,7 @@ public class EditUserCommentProcessor extends BaseProcessor implements EditUserC
             String username = getAuthenticatedUser();
             GetUserOutput getUserOutput = authenticationClient.getUser(username);
 
-            FindRoomByRoomNoOutput getRoomOutput = hotelClient.findRoomByRoomNo(input.getRoomNo());
+            FindRoomByRoomNoOutput getRoomOutput = hotelClient.findRoom(input.getRoomNo());
 
             EditUserCommentInput commentInput = conversionService.convert(input, EditUserCommentInput.class);
             commentInput.setUserId(getUserOutput.getId().toString());
