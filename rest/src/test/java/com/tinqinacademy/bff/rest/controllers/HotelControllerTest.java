@@ -10,8 +10,12 @@ import com.tinqinacademy.authentication.api.operations.validateacesstoken.Valida
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
+import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentRequest;
+import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentResponse;
 import com.tinqinacademy.comments.api.operations.getroomcomments.GetRoomCommentsOutput;
 import com.tinqinacademy.comments.api.operations.getroomcomments.RoomCommentOutput;
+import com.tinqinacademy.comments.api.operations.leaveroomcomment.LeaveRoomCommentInput;
+import com.tinqinacademy.comments.api.operations.leaveroomcomment.LeaveRoomCommentOutput;
 import com.tinqinacademy.comments.restexport.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
@@ -311,10 +315,315 @@ class HotelControllerTest {
     }
 
     @Test
-    void shouldRespondWithBadRequestAndRoomCommentsWhenProvidedInvalidRoomId() throws Exception {
+    void shouldRespondWithBadRequestWhenProvidedInvalidRoomIdWhenRetrievingComments() throws Exception {
         String roomId = "invalid";
 
         mockMvc.perform(get(RestRoutes.GET_ROOM_COMMENTS, roomId))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldRespondWithCreatedAndRoomCommentIdWhenLeavingComment() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUserOutput getUserOutput = GetUserOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("content")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+        GetRoomOutput roomOutput = GetRoomOutput
+                .builder()
+                .bedCount(1)
+                .price(BigDecimal.valueOf(20000))
+                .floor(4)
+                .bedSizes(List.of(BedSize.SINGLE))
+                .bathroomType(BathroomType.PRIVATE)
+                .datesOccupied(List.of())
+                .id(UUID.fromString(roomId))
+                .build();
+
+        LeaveRoomCommentOutput expectedOutput = LeaveRoomCommentOutput.builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.getUser(getUsernameFromTokenOutput.getUsername())).thenReturn(getUserOutput);
+        when(hotelClient.getRoomById(roomId)).thenReturn(roomOutput);
+        when(commentClient.leaveRoomComment(any(), any())).thenReturn(expectedOutput);
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(expectedOutput.getId().toString()));
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenLeavingCommentWithInvalidRoomId() throws Exception {
+        String roomId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("content")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
+    }
+
+    @Test
+    void shouldRespondWithUnAuthorizedWhenLeavingCommentWithoutBeingAuthenticated() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("content")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenLeavingCommentWithInsufficientRights() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_NONE")
+                .build();
+
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("content")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenLeavingCommentWithBlankContent() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content(null)
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content cannot not be blank"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenLeavingCommentWithUnderMinContent() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("bro")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content must be between 5-500 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenLeavingCommentWithOverMaxContent() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        LeaveRoomCommentRequest request = LeaveRoomCommentRequest.builder()
+                .roomId(roomId)
+                .content("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer rhoncus fermentum eros, sed vehicula eros commodo nec. Nunc nec viverra nunc. Sed nec nisl eu neque viverra laoreet. Maecenas sed posuere leo. Quisque eget facilisis lectus, nec bibendum felis. Etiam efficitur nisi a nisl bibendum suscipit. Praesent vitae tortor odio. Aenean bibendum odio pellentesque dui accumsan, nec malesuada augue consequat. Phasellus mattis non ex efficitur blandit. Vivamus dapibus lacus et rutrum commodo. In hac habitasse platea dictumst. Nam pellentesque a lacus a laoreet. Vivamus at blandit risus. Nunc elementum sodales elit, at fermentum erat aliquet placerat. Curabitur sit amet consectetur risus. Aenean vestibulum finibus ligula sit amet placerat.\n" +
+                        "\n" +
+                        "Nullam interdum nisi non nisl laoreet, non egestas ex efficitur. Aliquam quis metus viverra, dictum lorem at, dignissim leo. Quisque at diam rhoncus, volutpat massa quis, blandit risus. Vivamus ut massa varius, ultricies arcu aliquam, finibus ligula. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec malesuada lobortis massa mattis malesuada. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.\n" +
+                        "\n" +
+                        "Fusce vestibulum massa vitae risus pulvinar, ut sollicitudin lacus iaculis. Proin dapibus quam vitae nibh iaculis molestie. Etiam ut tellus fringilla, bibendum eros in, ultricies augue. Fusce a velit eget ex consequat convallis. Vestibulum hendrerit faucibus dignissim. Vestibulum molestie ullamcorper sollicitudin. Nullam ut ultricies sem. Integer lorem purus, dictum vel nulla a, facilisis porttitor nisl. Suspendisse ullamcorper ligula tellus, sed ornare erat rhoncus nec. Vestibulum bibendum lacus quis dui hendrerit lobortis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Cras id tellus viverra, euismod augue a, lacinia mauris. Etiam auctor tempus est nec commodo.\n" +
+                        "\n" +
+                        "Quisque posuere sem nunc, ut rutrum lorem imperdiet non. In hac habitasse platea dictumst. Pellentesque ac nulla at dui imperdiet varius eget laoreet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum facilisis iaculis. Pellentesque congue auctor mauris. Donec porta luctus velit semper pretium.\n" +
+                        "\n" +
+                        "Fusce et purus ac massa ornare condimentum. Sed at ante a felis molestie scelerisque. Cras venenatis ultricies enim a bibendum. Duis tincidunt malesuada rhoncus. Morbi id vehicula ipsum. Proin porta fermentum nunc, eget porta nulla aliquam vel. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tortor nisi, efficitur nec dolor quis, facilisis semper tellus.\n" +
+                        "\n" +
+                        "Proin ut libero vel ante maximus imperdiet at iaculis odio. Vestibulum semper volutpat augue, vel congue orci rutrum eget. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Donec placerat malesuada risus at aliquet. Vivamus nec lectus cursus, mattis ipsum non, mollis justo. Aliquam mollis tristique pretium. Quisque quis urna id dui vulputate gravida sit amet vel tellus. Duis mattis, nunc a tincidunt aliquet, elit ex dictum erat, sed consequat mauris nisl et tortor. Cras tempus nulla quam, non porta nulla varius consectetur. Aliquam sed facilisis mauris, non porttitor tortor. Proin bibendum in risus accumsan vehicula. Maecenas neque urna, sagittis eget tellus ac, egestas rutrum elit. Fusce non varius tellus, semper rhoncus augue. Curabitur ut rhoncus nibh, eget semper tellus. Etiam.\n" +
+                        "\n")
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestRoutes.LEAVE_COMMENT, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content must be between 5-500 characters"));
+    }
+
 }
