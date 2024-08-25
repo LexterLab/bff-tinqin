@@ -31,7 +31,7 @@ public class RegisterGuestProcessor extends BaseProcessor implements RegisterGue
         return Try.of(() -> {
             validateInput(request);
             RegisterGuestInput input = conversionService.convert(request, RegisterGuestInput.class);
-            RegisterGuestOutput output = hotelClient.registerGuest(input, request.getBookingId());
+            RegisterGuestOutput output = hotelClient.register(input, request.getBookingId());
             RegisterGuestResponse response = RegisterGuestResponse.builder().build();
             log.info("End registerGuest {}", output);
             return response;

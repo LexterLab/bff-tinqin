@@ -30,12 +30,12 @@ public class SearchRoomProcessor extends BaseProcessor implements SearchRoom {
     public Either<ErrorOutput, SearchRoomResponse> process(SearchRoomRequest request) {
         log.info("Start searchRoom {}", request);
         return Try.of(() -> {
-            SearchRoomOutput output = hotelClient.searchAvailableRooms(
+            SearchRoomOutput output = hotelClient.searchRooms(
                     request.getStartDate(),
                     request.getEndDate(),
                     request.getBedCount(),
-                    request.getBedSize() == null ? null : BedSize.getByCode(request.getBedSize().toString()),
-                    request.getBathroomType() == null ? null : BathroomType.getByCode(request.getBathroomType().toString())
+                    request.getBedSize() == null ? null : request.getBedSize().toString(),
+                    request.getBathroomType() == null ? null :request.getBathroomType().toString()
             );
             SearchRoomResponse response = SearchRoomResponse.builder()
                     .roomIds(output.getRoomIds())
