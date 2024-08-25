@@ -637,7 +637,6 @@ class HotelControllerTest {
                 .authorities("ROLE_USER")
                 .build();
 
-
         GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
                 .username("domino222")
                 .build();
@@ -937,4 +936,127 @@ class HotelControllerTest {
 
     }
 
+    @Test
+    void shouldRespondWithOKWhenCancellingRoomBooking() throws Exception {
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        GetUserOutput getUserOutput = GetUserOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        String bookingId = UUID.randomUUID().toString();
+
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.getUser(getUsernameFromTokenOutput.getUsername())).thenReturn(getUserOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.UNBOOK_ROOM, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenCancellingRoomBookingWithInvalidBookingIdFormat() throws Exception {
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GetUserOutput getUserOutput = GetUserOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        String bookingId = "invalid";
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.getUser(getUsernameFromTokenOutput.getUsername())).thenReturn(getUserOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.UNBOOK_ROOM, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenCancellingRoomBookingWithInsufficientRights() throws Exception {
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_NONE")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GetUserOutput getUserOutput = GetUserOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        String bookingId = UUID.randomUUID().toString();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.getUser(getUsernameFromTokenOutput.getUsername())).thenReturn(getUserOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.UNBOOK_ROOM, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenCancellingRoomBookingWithoutAuthentication() throws Exception {
+        String bookingId = UUID.randomUUID().toString();
+
+        mockMvc.perform(delete(RestAPIRoutes.UNBOOK_ROOM, bookingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
 }
