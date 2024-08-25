@@ -12,6 +12,7 @@ import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
 import com.tinqinacademy.bff.api.operations.editcomment.EditCommentRequest;
 import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentRequest;
+import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
 import com.tinqinacademy.comments.api.operations.editcomment.EditCommentInput;
 import com.tinqinacademy.comments.api.operations.editcomment.EditCommentOutput;
 import com.tinqinacademy.comments.api.operations.getroomcomments.GetRoomCommentsOutput;
@@ -22,6 +23,8 @@ import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.enumerations.BathroomType;
 import com.tinqinacademy.hotel.api.enumerations.BedSize;
 import com.tinqinacademy.hotel.api.operations.getroom.GetRoomOutput;
+import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomInput;
+import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -899,6 +902,39 @@ class HotelControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithOKAndAvailableRoomIds() throws Exception {
+        SearchRoomInput input = SearchRoomInput
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .bedSize(BedSize.SINGLE)
+                .startDate(LocalDateTime.now().plusMonths(1))
+                .endDate(LocalDateTime.now().plusMonths(1).plusWeeks(1))
+                .bedCount(1)
+                .build();
+
+        SearchRoomOutput expectedOutput = SearchRoomOutput
+                .builder()
+                .roomIds(List.of(UUID.randomUUID(), UUID.randomUUID()))
+                .build();
+
+        when(hotelClient.searchRooms(input.getStartDate(),input.getEndDate(), input.getBedCount(),
+                input.getBedSize().toString(), input.getBathroomType().toString()))
+                .thenReturn(expectedOutput);
+
+        mockMvc.perform(get(RestAPIRoutes.SEARCH_ROOMS)
+                .param("startDate", String.valueOf(input.getStartDate()))
+                .param("endDate", String.valueOf(input.getEndDate()))
+                .param("bedCount", String.valueOf(input.getBedCount()))
+                .param("bedSize", input.getBedSize().toString())
+                .param("bathroomType", input.getBathroomType().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomIds").isArray())
+                .andExpect(jsonPath("$.roomIds[0]").value(expectedOutput.getRoomIds().getFirst().toString()))
+                .andExpect(jsonPath("$.roomIds[1]").value(expectedOutput.getRoomIds().getLast().toString()));
+
     }
 
 }
