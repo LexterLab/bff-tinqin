@@ -10,9 +10,11 @@ import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
+import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -466,4 +469,539 @@ class SystemControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldRespondWithOKAndRoomIdWhenUpdatingRoom() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(3)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomId").value(output.getRoomId().toString()));
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithInvalidRoomId() throws Exception {
+        String roomId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(3)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithNullBathroomType() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(null)
+                .floor(3)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithNullFloor() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(null)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithAboveMaxFloor() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(11)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithBelowMinFloor() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(0)
+                .roomNo("201A")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithNullRoomNo() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo(null)
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithInvalidRoomNo() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo("201")
+                .price(BigDecimal.valueOf(20))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithNullPrice() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo("201")
+                .price(null)
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenUpdatingRoomWithNegativePrice() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo("201")
+                .price(BigDecimal.valueOf(-1))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenUpdatingRoomWithoutAuthentication() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo("201")
+                .price(BigDecimal.valueOf(-1))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenUpdatingRoomWithInsufficientRights() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        UpdateRoomRequest request = UpdateRoomRequest
+                .builder()
+                .bathroomType(BathroomType.PRIVATE)
+                .floor(2)
+                .roomNo("201")
+                .price(BigDecimal.valueOf(-1))
+                .beds(List.of(BedSize.SINGLE))
+                .build();
+
+        UpdateRoomOutput output = UpdateRoomOutput.builder()
+                .roomId(UUID.randomUUID())
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.updateRoom(any(), any())).thenReturn(output);
+
+        mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+    }
+
 }
