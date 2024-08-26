@@ -12,8 +12,6 @@ import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.operations.bookroom.BookRoomRequest;
 import com.tinqinacademy.bff.api.operations.editcomment.EditCommentRequest;
 import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentRequest;
-import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
-import com.tinqinacademy.comments.api.operations.editcomment.EditCommentInput;
 import com.tinqinacademy.comments.api.operations.editcomment.EditCommentOutput;
 import com.tinqinacademy.comments.api.operations.getroomcomments.GetRoomCommentsOutput;
 import com.tinqinacademy.comments.api.operations.getroomcomments.RoomCommentOutput;
