@@ -10,10 +10,12 @@ import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
+import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
 import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
+import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import org.junit.jupiter.api.Test;
@@ -32,8 +34,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -1001,6 +1002,142 @@ class SystemControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    void shouldRespondWithOKWhenDeletingRoom() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        DeleteRoomRequest request = DeleteRoomRequest
+                .builder()
+                .roomId(roomId)
+                .build();
+
+        DeleteRoomOutput expectedOutput = DeleteRoomOutput
+                .builder()
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.deleteRoom(request.getRoomId())).thenReturn(expectedOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenDeletingRoomWithInvalidId() throws Exception {
+        String roomId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        DeleteRoomRequest request = DeleteRoomRequest
+                .builder()
+                .roomId(roomId)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenDeletingRoomWithInsufficientRights() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        DeleteRoomRequest request = DeleteRoomRequest
+                .builder()
+                .roomId(roomId)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenDeletingRoomWithoutAuthentication() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        DeleteRoomRequest request = DeleteRoomRequest
+                .builder()
+                .roomId(roomId)
+                .build();
+
+        mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
 
     }
 
