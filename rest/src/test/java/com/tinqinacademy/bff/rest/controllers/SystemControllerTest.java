@@ -12,6 +12,8 @@ import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
 import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
+import com.tinqinacademy.bff.api.operations.registerguest.GuestInput;
+import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestRequest;
 import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
@@ -30,6 +32,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -1441,6 +1445,913 @@ class SystemControllerTest {
                 .build();
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRespondWithCreatedWhenRegisteringGuest() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithInvalidBookingId() throws Exception {
+        String bookingId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field bookingId must be UUID"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithNullFirstName() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName(null)
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName must not be empty"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithBelowMinFirstName() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("S")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName must be between 2-20 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithAboveMaxFirstName() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("SebastianSebastianSebastianSebastianSebastianSebastianSebastianSebastianSebastianSebastianSebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName must be between 2-20 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithAboveMaxLastName() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("VettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettelVettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field lastName must be between 2-20 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithBelowMinLastName() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("V")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field lastName must be between 2-20 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithInvalidBirthday() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().plusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field birthDay must be a past date"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithNullBirthday() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(null)
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field birthDay cannot be null"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithBlankIdCardNo() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo(" ")
+                .idCardValidity(LocalDate.now().plusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardNo must not be empty"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithInvalidIdCardValidity() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().minusYears(2))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardValidity must be valid"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithNullIdCardValidity() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(null)
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardValidity should not be null"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithNullIdCardIssueAuthority() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority(null)
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardIssueAuthority must not be empty"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithBelowMinCardIssueAuthority() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("B")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardIssueAuthority must be between 2-100 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithAboveMaxCardIssueAuthority() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("BULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTANBULGARISTAN")
+                .idCardIssueDate(LocalDate.now().minusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardIssueAuthority must be between 2-100 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithInvalidIdCardIssueDate() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(LocalDate.now().plusYears(6))
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardIssueDate must be past or present"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithNullIdCardIssueDate() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(null)
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field idCardIssueDate must not be null"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenRegisteringGuestWithInsufficientRights() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(null)
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenRegisteringGuestWithoutAuthentication() throws Exception {
+        String bookingId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        GuestInput guest = GuestInput
+                .builder()
+                .firstName("Sebastian")
+                .lastName("Vettel")
+                .birthday(LocalDate.now().minusYears(20))
+                .idCardNo("3232 3232 3232 3232")
+                .idCardValidity(LocalDate.now().plusYears(10))
+                .idCardIssueAuthority("BGN")
+                .idCardIssueDate(null)
+                .build();
+
+        RegisterGuestRequest request = RegisterGuestRequest
+                .builder()
+                .guests(List.of(guest))
+                .build();
+
+        mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
