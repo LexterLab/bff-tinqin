@@ -11,11 +11,13 @@ import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
+import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
 import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
+import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomOutput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import org.junit.jupiter.api.Test;
@@ -1082,7 +1084,8 @@ class SystemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));;
 
     }
 
@@ -1139,6 +1142,309 @@ class SystemControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
 
+    }
+
+    @Test
+    void shouldRespondWithOKAndRoomIdWhenPartiallyUpdatingRoom() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(3)
+                .build();
+
+        PartialUpdateRoomOutput expectedOutput = PartialUpdateRoomOutput
+                .builder()
+                .roomId(UUID.fromString(roomId))
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.partialUpdateRoom(any(), any())).thenReturn(expectedOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roomId").value(roomId));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenPartiallyUpdatingRoomWithInvalidRoomId() throws Exception {
+        String roomId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(3)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenPartiallyUpdatingRoomWithBelowMinFloor() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(0)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field floor must be minimum 1"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenPartiallyUpdatingRoomWithAboveMaxFloor() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(11)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field floor must be maximum 10"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenPartiallyUpdatingRoomWithInvalidRoomNoFormat() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301")
+                .price(BigDecimal.valueOf(20))
+                .floor(7)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomNo must be 4 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenPartiallyUpdatingRoomWithNegativePrice() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(-1))
+                .floor(7)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field price must be min 0"));
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenPartiallyUpdatingRoomWithInsufficientRights() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(7)
+                .build();
+
+        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenPartiallyUpdatingRoomWithoutAuthentication() throws Exception {
+        String roomId = "923364b0-4ed0-4a7e-8c23-ceb5c238ceee";
+
+        PartialUpdateRoomRequest request = PartialUpdateRoomRequest
+                .builder()
+                .roomNo("301A")
+                .price(BigDecimal.valueOf(20))
+                .floor(7)
+                .build();
+
+        mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
     }
 
 }
