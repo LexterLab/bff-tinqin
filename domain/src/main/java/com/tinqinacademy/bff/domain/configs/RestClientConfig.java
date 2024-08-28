@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import com.tinqinacademy.bff.domain.deserialisers.UserDeserializer;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;

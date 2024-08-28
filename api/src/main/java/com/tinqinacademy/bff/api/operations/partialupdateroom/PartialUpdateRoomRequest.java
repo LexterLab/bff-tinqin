@@ -28,7 +28,7 @@ public class PartialUpdateRoomRequest implements OperationInput {
     private BathroomType bathroomType;
     @Schema(example = "4")
     @Min(value = 1, message = "Field floor must be minimum 1")
-    @Max(value = 10, message = "Field floor must be maximum 12")
+    @Max(value = 10, message = "Field floor must be maximum 10")
     private Integer floor;
     @Schema(example = "201A")
     @Size(min = 4, max = 4, message = "Field roomNo must be 4 characters")

@@ -3,7 +3,6 @@ package com.tinqinacademy.bff.core.jwt;
 import com.tinqinacademy.authentication.api.operations.generateaccesstoken.GetUsernameFromTokenInput;
 import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserDetailsInput;
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenInput;
-import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenOutput;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 .accessToken(token)
                 .build();
 
-        if (StringUtils.hasText(token) && authenticationClient.validateToken(input).getSuccess()) {
+        if (StringUtils.hasText(token) && authenticationClient.validateAccessToken(input).getSuccess()) {
 
 
             GetUsernameFromTokenInput tokenInput = GetUsernameFromTokenInput.builder()
@@ -52,7 +51,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                     .builder()
                     .username(username)
                     .build();
-            UserDetails userDetails = authenticationClient.loadUserDetails(userDetailsInput).getUserDetails();
+            UserDetails userDetails = authenticationClient.loadUser(userDetailsInput).getUserDetails();
 
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());

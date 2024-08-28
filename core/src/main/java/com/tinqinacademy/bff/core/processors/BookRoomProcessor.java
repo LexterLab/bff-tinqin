@@ -39,7 +39,7 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
       return Try.of(() -> {
           validateInput(request);
 
-          GetUserOutput userOutput = authenticationClient.getUser(getAuthenticatedUser());
+          GetUserOutput userOutput = authenticationClient.getUserInfo(getAuthenticatedUser());
 
           BookRoomInput input = conversionService.convert(request, BookRoomInput.class);
           input.setUserId(userOutput.getId().toString());

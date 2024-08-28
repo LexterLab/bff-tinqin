@@ -38,7 +38,7 @@ public class UnbookRoomProcessor extends BaseProcessor implements UnbookRoom {
         return Try.of(() -> {
             validateInput(request);
 
-            GetUserOutput userOutput = authenticationClient.getUser(getAuthenticatedUser());
+            GetUserOutput userOutput = authenticationClient.getUserInfo(getAuthenticatedUser());
 
             UnbookRoomInput input = UnbookRoomInput.builder()
                     .bookingId(request.getBookingId())
