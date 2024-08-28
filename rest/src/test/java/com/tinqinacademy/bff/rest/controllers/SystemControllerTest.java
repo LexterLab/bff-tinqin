@@ -2385,7 +2385,6 @@ class SystemControllerTest {
                 .success(true)
                 .build();
 
-
         GuestOutput guest = GuestOutput
                 .builder()
                 .firstName("George")
@@ -2403,9 +2402,7 @@ class SystemControllerTest {
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
         when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
-        when(hotelClient.getGuestReport(request.getStartDate(), request.getEndDate(), request.getFirstName(),
-                request.getLastName(), UUID.randomUUID().toString(), request.getIdCardNo(), request.getIdCardValidity(),
-                request.getIdCardIssueAuthority(), request.getIdCardIssueDate(), request.getRoomNo()))
+        when(hotelClient.getGuestReport(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(expectedOutput);
 
         mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
@@ -2414,8 +2411,61 @@ class SystemControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.guestss[0].firstName").value(request.getFirstName()))
-                .andExpect(jsonPath("$.guestss[0].lastName").value(request.getLastName()));
+                .andExpect(jsonPath("$.guests[0].firstName").value(request.getFirstName()))
+                .andExpect(jsonPath("$.guests[0].lastName").value(request.getLastName()));
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenSearchingGuestsWithInsufficientRights() throws Exception {
+        GetGuestReportRequest request = GetGuestReportRequest
+                .builder()
+                .startDate(LocalDateTime.now().plusMonths(2))
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenSearchingGuestsWithUnauthorized() throws Exception {
+        GetGuestReportRequest request = GetGuestReportRequest
+                .builder()
+                .startDate(LocalDateTime.now().plusMonths(2))
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+        mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
     }
 
 }
