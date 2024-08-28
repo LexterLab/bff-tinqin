@@ -2,24 +2,31 @@ package com.tinqinacademy.bff.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinqinacademy.authentication.api.operations.generateaccesstoken.GetUsernameFromTokenOutput;
+import com.tinqinacademy.authentication.api.operations.getuser.GetUserOutput;
 import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserDetailsInput;
 import com.tinqinacademy.authentication.api.operations.loaduserdetails.LoadUserDetailsOutput;
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenInput;
 import com.tinqinacademy.authentication.api.operations.validateacesstoken.ValidateAccessTokenOutput;
 import com.tinqinacademy.authentication.restexport.AuthenticationClient;
+import com.tinqinacademy.bff.api.RestRoutes;
 import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
+import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentRequest;
 import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
 import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
 import com.tinqinacademy.bff.api.operations.registerguest.GuestInput;
 import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestRequest;
 import com.tinqinacademy.bff.api.operations.updateroom.UpdateRoomRequest;
+import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentInput;
+import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentOutput;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
+import com.tinqinacademy.hotel.api.operations.findroombyroomno.FindRoomByRoomNoOutput;
 import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportOutput;
 import com.tinqinacademy.hotel.api.operations.getguestreport.GuestOutput;
 import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomOutput;
@@ -40,7 +47,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -59,6 +66,9 @@ class SystemControllerTest {
 
     @MockBean
     private HotelClient hotelClient;
+
+    @MockBean
+    private CommentClient commentClient;
 
     @MockBean
     private AuthenticationClient authenticationClient;
@@ -1092,7 +1102,7 @@ class SystemControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));;
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
 
     }
 
@@ -2397,15 +2407,19 @@ class SystemControllerTest {
                 .guestsReports(List.of(guest))
                 .build();
 
-
         when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
         when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
-        when(hotelClient.getGuestReport(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(hotelClient.getGuestReport(request.getStartDate(), request.getEndDate(), request.getFirstName(),
+                        request.getLastName(), null, request.getIdCardNo(), request.getIdCardValidity(),
+                        request.getIdCardIssueAuthority(), request.getIdCardIssueDate(), request.getRoomNo()))
                 .thenReturn(expectedOutput);
 
         mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
+                        .param("startDate", request.getStartDate().toString())
+                        .param("firstName", request.getFirstName())
+                        .param("lastName", request.getLastName())
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -2462,6 +2476,627 @@ class SystemControllerTest {
                 .build();
 
         mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRespondWithOKAndCommentIdWhenEditingUserComment() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        EditUserCommentOutput expectedOutput = EditUserCommentOutput
+                .builder()
+                .id(UUID.fromString(commentId))
+                .build();
+
+        GetUserOutput user = GetUserOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        FindRoomByRoomNoOutput room = FindRoomByRoomNoOutput
+                .builder()
+                .id(UUID.randomUUID())
+                .roomNo(request.getRoomNo())
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.getUserInfo(getUsernameFromTokenOutput.getUsername())).thenReturn(user);
+        when(hotelClient.findRoom(request.getRoomNo())).thenReturn(room);
+        when(commentClient.editUserComment(any(String.class), any(EditUserCommentInput.class))).thenReturn(expectedOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(commentId));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithInvalidCommentId() throws Exception {
+        String commentId = "invalid";
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field commentId must be UUID"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithInvalidRoomNo() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomNo must be 4 chars"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithNullRoomNo() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo(null)
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomNo cannot be blank"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithNullFirstName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName(null)
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName cannot be blank"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithAboveMaxFirstName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("LewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewisLewis")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName must be 2-30 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithBelowMinFirstName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("L")
+                .lastName("Hamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field firstName must be 2-30 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithBelowMinLastName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("H")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field lastName must be 2-30 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithAboveMaxLastName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("HamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamiltonHamilton")
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field lastName must be 2-30 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithNullLastName() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName(null)
+                .content("This room was meh")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field lastName cannot be blank"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithNullContent() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content(null)
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content cannot be blank"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithBelowMinContent() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("four")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content must be 5-500 characters"));
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenEditingUserCommentWithAboveMaxContent() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("""
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi bibendum lacus at nulla bibendum eleifend. In eu mi lorem. In at augue quis urna semper viverra. Integer at ex sed est ultricies porttitor. Morbi a risus eget lectus accumsan lobortis nec vel quam. Duis commodo malesuada leo ac viverra. Sed dolor libero, blandit non mi ut, pretium porta lorem. Proin feugiat orci ac leo semper, ac tincidunt libero rhoncus. Vivamus pretium in lectus et mollis. Integer ultrices ante a ligula elementum euismod. Cras volutpat dui ut ex venenatis, a aliquet lacus blandit. Integer condimentum porttitor risus eu faucibus. Praesent consectetur risus ac aliquet tempor.
+                        Ut ligula sapien, vulputate ut lectus vitae, iaculis suscipit nulla. Nunc consectetur maximus risus, a efficitur lacus sollicitudin quis. Cras mi ex, tincidunt nec justo ultricies, porttitor egestas est. Vestibulum feugiat quam sed orci suscipit, luctus iaculis mi pellentesque. Sed eleifend, metus in iaculis tristique, libero urna fringilla massa, eget porta magna purus at turpis. Nunc in ipsum pellentesque, tempor enim sed, pretium magna. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Praesent nec iaculis justo. Suspendisse iaculis, justo sit amet condimentum varius, dui odio facilisis sapien, nec mattis metus nunc nec turpis. Cras bibendum eleifend elit, fermentum vehicula est vulputate at. Aenean sed tincidunt orci, vel volutpat orci. Pellentesque at mollis nulla.
+                        Morbi a ligula a metus gravida feugiat. Curabitur a lacus vel eros tempor facilisis. Mauris facilisis dolor nec erat viverra, eget consectetur leo tincidunt. Nulla risus risus, lobortis ut massa at, porttitor maximus sem. Integer semper enim sed efficitur porttitor. Phasellus sodales blandit leo, eu convallis massa luctus et. Aliquam at imperdiet risus. Cras nec purus eros. Donec egestas eget ipsum euismod rhoncus. Proin maximus sollicitudin dui, sit amet placerat felis eleifend nec. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Suspendisse at ligula in massa mollis consequat nec ut ligula. Nulla scelerisque interdum nisl, eu accumsan erat vestibulum a.
+                        In justo dui, varius nec est pharetra, fermentum dictum nisi. Nam dignissim eleifend massa at gravida. Quisque sagittis est dolor, ac rhoncus felis rutrum a. Suspendisse in blandit massa. Vestibulum porttitor fringilla ultricies. Sed vulputate mauris et orci dapibus, sed fringilla felis feugiat. Donec laoreet finibus consectetur. Aenean mattis volutpat dictum. Nulla bibendum dignissim justo nec lobortis. In tempus metus eget tellus volutpat vehicula in ut turpis. Duis turpis neque, dignissim id pellentesque eu, malesuada eu ipsum. Suspendisse sit amet venenatis elit.
+                        Cras eget vehicula odio, a tincidunt magna. Duis sollicitudin felis leo, id pharetra massa mollis nec. Aenean et massa lorem. Morbi convallis elit metus, ac faucibus risus cursus ultrices. Fusce fermentum posuere placerat. Maecenas id nunc elit. Aliquam facilisis sagittis lorem, eget consectetur ante posuere non. Sed consectetur justo a vehicula egestas. Nunc eu malesuada nunc, in pulvinar neque. Fusce viverra lorem id quam condimentum ultrices. Suspendisse consectetur et mauris eu feugiat. Quisque quis bibendum urna, sit amet porta ligula.""")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field content must be 5-500 characters"));
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenEditingUserCommentWithInsufficientRights() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("Superb room")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenEditingUserCommentWithoutAuthentication() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        EditUserCommentRequest request = EditUserCommentRequest
+                .builder()
+                .roomNo("201A")
+                .firstName("Lewis")
+                .lastName("Hamilton")
+                .content("Superb room")
+                .build();
+
+        mockMvc.perform(put(RestRoutes.EDIT_USER_COMMENT, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
