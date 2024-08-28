@@ -7,7 +7,6 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReport;
 import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
 import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportResponse;
-import com.tinqinacademy.bff.api.operations.getguestrerport.GuestOutput;
 import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;
@@ -16,8 +15,6 @@ import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static io.vavr.API.Match;
 

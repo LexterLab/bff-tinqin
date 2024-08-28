@@ -42,7 +42,7 @@ public class EditCommentProcessor extends BaseProcessor implements EditComment {
 
             String username = getAuthenticatedUser();
 
-            GetUserOutput getUserOutput = authenticationClient.getUser(username);
+            GetUserOutput getUserOutput = authenticationClient.getUserInfo(username);
 
             EditCommentInput editCommentInput = buildEditCommentInput(input, getUserOutput);
 

@@ -4,8 +4,6 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoom;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomResponse;
-import com.tinqinacademy.hotel.api.enumerations.BathroomType;
-import com.tinqinacademy.hotel.api.enumerations.BedSize;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;

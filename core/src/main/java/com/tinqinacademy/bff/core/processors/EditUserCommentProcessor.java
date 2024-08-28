@@ -45,7 +45,7 @@ public class EditUserCommentProcessor extends BaseProcessor implements EditUserC
             validateInput(input);
 
             String username = getAuthenticatedUser();
-            GetUserOutput getUserOutput = authenticationClient.getUser(username);
+            GetUserOutput getUserOutput = authenticationClient.getUserInfo(username);
 
             FindRoomByRoomNoOutput getRoomOutput = hotelClient.findRoom(input.getRoomNo());
 

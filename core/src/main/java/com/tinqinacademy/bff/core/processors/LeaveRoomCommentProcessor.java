@@ -44,7 +44,7 @@ public class LeaveRoomCommentProcessor extends BaseProcessor implements LeaveRoo
             validateInput(request);
 
             String username = getAuthenticatedUser();
-            GetUserOutput userOutput = authenticationClient.getUser(username);
+            GetUserOutput userOutput = authenticationClient.getUserInfo(username);
 
             GetRoomOutput roomOutput = hotelClient.getRoomById(request.getRoomId());
 
