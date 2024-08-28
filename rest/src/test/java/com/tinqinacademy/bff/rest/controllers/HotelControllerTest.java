@@ -41,7 +41,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,7 +93,8 @@ class HotelControllerTest {
         String roomId = "invalid";
 
         mockMvc.perform(get(RestAPIRoutes.GET_ROOM_DETAILS, roomId))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
     }
 
     @Test
@@ -168,9 +168,6 @@ class HotelControllerTest {
                 .username("domino222")
                 .build();
 
-
-
-
         ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
                 .success(true)
                 .build();
@@ -185,7 +182,8 @@ class HotelControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("Field roomId must be UUID"));
     }
 
     @Test
@@ -255,9 +253,6 @@ class HotelControllerTest {
                 .username("domino222")
                 .build();
 
-
-
-
         ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
                 .success(true)
                 .build();
@@ -322,7 +317,8 @@ class HotelControllerTest {
         String roomId = "invalid";
 
         mockMvc.perform(get(RestRoutes.GET_ROOM_COMMENTS, roomId))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value( "Field roomId must be UUID"));
     }
 
     @Test
@@ -400,7 +396,6 @@ class HotelControllerTest {
                 .authorities("ROLE_USER")
                 .build();
 
-
         GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
                 .username("domino222")
                 .build();
@@ -415,7 +410,6 @@ class HotelControllerTest {
                 .firstName("George")
                 .lastName("Russell")
                 .build();
-
 
         when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
@@ -476,7 +470,6 @@ class HotelControllerTest {
                 .firstName("George")
                 .lastName("Russell")
                 .build();
-
 
         when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
