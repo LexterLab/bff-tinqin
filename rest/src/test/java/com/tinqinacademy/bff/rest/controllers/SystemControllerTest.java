@@ -3103,4 +3103,99 @@ class SystemControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldRespondWithOKWhenDeletingRoomComment() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(delete(RestRoutes.DELETE_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                        .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldRespondWithBadRequestWhenDeletingRoomCommentWithInvalidCommentId() throws Exception {
+        String commentId = "invalid";
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(delete(RestRoutes.DELETE_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRespondWithForbiddenWhenDeletingRoomCommentWithInsufficientRights() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_USER")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+
+        mockMvc.perform(delete(RestRoutes.DELETE_COMMENT, commentId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldRespondWithUnauthorizedWhenDeletingRoomCommentWithoutAuthentication() throws Exception {
+        String commentId = UUID.randomUUID().toString();
+
+        mockMvc.perform(delete(RestRoutes.DELETE_COMMENT, commentId))
+                .andExpect(status().isUnauthorized());
+    }
+
 }
