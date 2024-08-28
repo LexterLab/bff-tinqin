@@ -4,8 +4,6 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoom;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomRequest;
 import com.tinqinacademy.bff.api.operations.searchroom.SearchRoomResponse;
-import com.tinqinacademy.hotel.api.enumerations.BathroomType;
-import com.tinqinacademy.hotel.api.enumerations.BedSize;
 import com.tinqinacademy.hotel.api.operations.searchroom.SearchRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;
@@ -30,12 +28,12 @@ public class SearchRoomProcessor extends BaseProcessor implements SearchRoom {
     public Either<ErrorOutput, SearchRoomResponse> process(SearchRoomRequest request) {
         log.info("Start searchRoom {}", request);
         return Try.of(() -> {
-            SearchRoomOutput output = hotelClient.searchAvailableRooms(
+            SearchRoomOutput output = hotelClient.searchRooms(
                     request.getStartDate(),
                     request.getEndDate(),
                     request.getBedCount(),
-                    request.getBedSize() == null ? null : BedSize.getByCode(request.getBedSize().toString()),
-                    request.getBathroomType() == null ? null : BathroomType.getByCode(request.getBathroomType().toString())
+                    request.getBedSize() == null ? null : request.getBedSize().toString(),
+                    request.getBathroomType() == null ? null :request.getBathroomType().toString()
             );
             SearchRoomResponse response = SearchRoomResponse.builder()
                     .roomIds(output.getRoomIds())

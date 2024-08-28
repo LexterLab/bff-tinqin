@@ -4,7 +4,6 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoom;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomResponse;
-import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomInput;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;

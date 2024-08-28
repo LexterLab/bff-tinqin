@@ -4,8 +4,7 @@ import com.tinqinacademy.bff.api.errors.ErrorOutput;
 import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomComment;
 import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomCommentRequest;
 import com.tinqinacademy.bff.api.operations.deleteroomcomment.DeleteRoomCommentResponse;
-import com.tinqinacademy.comments.api.operations.deletecomment.DeleteRoomCommentOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
@@ -32,7 +31,7 @@ public class DeleteRoomCommentProcessor extends BaseProcessor implements DeleteR
         return Try.of(() -> {
             validateInput(input);
 
-            commentClient.deleteRoomComment(input.getCommentId());
+            commentClient.deleteUserComment(input.getCommentId());
 
             DeleteRoomCommentResponse response = DeleteRoomCommentResponse.builder().build();
 

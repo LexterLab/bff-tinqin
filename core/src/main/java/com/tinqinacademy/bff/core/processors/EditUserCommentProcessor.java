@@ -8,7 +8,7 @@ import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentReque
 import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentResponse;
 import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentInput;
 import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.operations.findroombyroomno.FindRoomByRoomNoOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;
@@ -45,9 +45,9 @@ public class EditUserCommentProcessor extends BaseProcessor implements EditUserC
             validateInput(input);
 
             String username = getAuthenticatedUser();
-            GetUserOutput getUserOutput = authenticationClient.getUser(username);
+            GetUserOutput getUserOutput = authenticationClient.getUserInfo(username);
 
-            FindRoomByRoomNoOutput getRoomOutput = hotelClient.findRoomByRoomNo(input.getRoomNo());
+            FindRoomByRoomNoOutput getRoomOutput = hotelClient.findRoom(input.getRoomNo());
 
             EditUserCommentInput commentInput = conversionService.convert(input, EditUserCommentInput.class);
             commentInput.setUserId(getUserOutput.getId().toString());

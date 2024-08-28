@@ -39,14 +39,15 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
       return Try.of(() -> {
           validateInput(request);
 
-          GetUserOutput userOutput = authenticationClient.getUser(getAuthenticatedUser());
+          GetUserOutput userOutput = authenticationClient.getUserInfo(getAuthenticatedUser());
+
 
           BookRoomInput input = conversionService.convert(request, BookRoomInput.class);
           input.setUserId(userOutput.getId().toString());
 
           BookRoomOutput output = hotelClient.bookRoom(input.getRoomId(), input);
           BookRoomResponse response = BookRoomResponse.builder().build();
-          log.info("End bookRoom {}", response);
+          log.info("End bookRoom {}", output);
           return response;
       }).toEither()
               .mapLeft(throwable -> Match(throwable).of(
