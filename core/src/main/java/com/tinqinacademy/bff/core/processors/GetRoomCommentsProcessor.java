@@ -5,7 +5,7 @@ import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomComments;
 import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsRequest;
 import com.tinqinacademy.bff.api.operations.getroomcomments.GetRoomCommentsResponse;
 import com.tinqinacademy.comments.api.operations.getroomcomments.GetRoomCommentsOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.operations.getroom.GetRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;

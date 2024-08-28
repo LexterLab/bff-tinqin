@@ -11,7 +11,6 @@ import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
-import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReport;
 import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
 import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
 import com.tinqinacademy.bff.api.operations.registerguest.GuestInput;

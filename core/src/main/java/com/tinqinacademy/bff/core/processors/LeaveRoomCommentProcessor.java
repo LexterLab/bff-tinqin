@@ -8,7 +8,7 @@ import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentReq
 import com.tinqinacademy.bff.api.operations.leaveroomcomment.LeaveRoomCommentResponse;
 import com.tinqinacademy.comments.api.operations.leaveroomcomment.LeaveRoomCommentInput;
 import com.tinqinacademy.comments.api.operations.leaveroomcomment.LeaveRoomCommentOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.operations.getroom.GetRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;

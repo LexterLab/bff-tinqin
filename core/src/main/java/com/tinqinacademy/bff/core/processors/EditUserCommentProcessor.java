@@ -8,7 +8,7 @@ import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentReque
 import com.tinqinacademy.bff.api.operations.editusercomment.EditUserCommentResponse;
 import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentInput;
 import com.tinqinacademy.comments.api.operations.editusercomment.EditUserCommentOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import com.tinqinacademy.hotel.api.operations.findroombyroomno.FindRoomByRoomNoOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
 import io.vavr.control.Either;

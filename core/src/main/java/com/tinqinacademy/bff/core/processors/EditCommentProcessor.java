@@ -8,7 +8,7 @@ import com.tinqinacademy.bff.api.operations.editcomment.EditCommentRequest;
 import com.tinqinacademy.bff.api.operations.editcomment.EditCommentResponse;
 import com.tinqinacademy.comments.api.operations.editcomment.EditCommentInput;
 import com.tinqinacademy.comments.api.operations.editcomment.EditCommentOutput;
-import com.tinqinacademy.comments.restexport.restexport.CommentClient;
+import com.tinqinacademy.comments.restexport.CommentClient;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
