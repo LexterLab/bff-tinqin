@@ -41,6 +41,7 @@ public class BookRoomProcessor extends BaseProcessor implements BookRoom {
 
           GetUserOutput userOutput = authenticationClient.getUserInfo(getAuthenticatedUser());
 
+
           BookRoomInput input = conversionService.convert(request, BookRoomInput.class);
           input.setUserId(userOutput.getId().toString());
 
