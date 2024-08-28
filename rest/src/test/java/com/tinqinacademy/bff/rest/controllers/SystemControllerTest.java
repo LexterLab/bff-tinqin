@@ -11,6 +11,8 @@ import com.tinqinacademy.bff.api.enumerations.BathroomType;
 import com.tinqinacademy.bff.api.enumerations.BedSize;
 import com.tinqinacademy.bff.api.operations.createroom.CreateRoomRequest;
 import com.tinqinacademy.bff.api.operations.deleteroom.DeleteRoomRequest;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReport;
+import com.tinqinacademy.bff.api.operations.getguestrerport.GetGuestReportRequest;
 import com.tinqinacademy.bff.api.operations.partialupdateroom.PartialUpdateRoomRequest;
 import com.tinqinacademy.bff.api.operations.registerguest.GuestInput;
 import com.tinqinacademy.bff.api.operations.registerguest.RegisterGuestRequest;
@@ -19,6 +21,8 @@ import com.tinqinacademy.hotel.api.RestAPIRoutes;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomInput;
 import com.tinqinacademy.hotel.api.operations.createroom.CreateRoomOutput;
 import com.tinqinacademy.hotel.api.operations.deleteroom.DeleteRoomOutput;
+import com.tinqinacademy.hotel.api.operations.getguestreport.GetGuestReportOutput;
+import com.tinqinacademy.hotel.api.operations.getguestreport.GuestOutput;
 import com.tinqinacademy.hotel.api.operations.partialupdateroom.PartialUpdateRoomOutput;
 import com.tinqinacademy.hotel.api.operations.updateroom.UpdateRoomOutput;
 import com.tinqinacademy.hotel.restexport.HotelClient;
@@ -92,10 +96,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID().toString())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.createRoom(any(CreateRoomInput.class))).thenReturn(expectedOutput);
 
 
@@ -134,10 +138,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -190,10 +194,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -229,10 +233,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -268,10 +272,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -307,10 +311,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -346,10 +350,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -385,10 +389,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -424,10 +428,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -463,10 +467,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
 
         mockMvc.perform(post(RestAPIRoutes.CREATE_ROOM)
@@ -509,10 +513,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -553,10 +557,10 @@ class SystemControllerTest {
                 .beds(List.of(BedSize.SINGLE))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -599,10 +603,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -645,10 +649,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -692,10 +696,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -739,10 +743,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -786,10 +790,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -833,10 +837,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -880,10 +884,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -927,10 +931,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -996,10 +1000,10 @@ class SystemControllerTest {
                 .roomId(UUID.randomUUID())
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.updateRoom(any(), any())).thenReturn(output);
 
         mockMvc.perform(put(RestAPIRoutes.UPDATE_ROOM, roomId)
@@ -1039,10 +1043,10 @@ class SystemControllerTest {
                 .builder()
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.deleteRoom(request.getRoomId())).thenReturn(expectedOutput);
 
         mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
@@ -1078,10 +1082,10 @@ class SystemControllerTest {
                 .roomId(roomId)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
                         .header("Authorization", "Bearer " + accessToken)
@@ -1117,10 +1121,10 @@ class SystemControllerTest {
                 .roomId(roomId)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(delete(RestAPIRoutes.DELETE_ROOM, request.getRoomId())
                         .header("Authorization", "Bearer " + accessToken)
@@ -1179,10 +1183,10 @@ class SystemControllerTest {
                 .roomId(UUID.fromString(roomId))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
         when(hotelClient.partialUpdateRoom(any(), any())).thenReturn(expectedOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
@@ -1220,10 +1224,10 @@ class SystemControllerTest {
                 .floor(3)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1260,10 +1264,10 @@ class SystemControllerTest {
                 .floor(0)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1300,10 +1304,10 @@ class SystemControllerTest {
                 .floor(11)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1340,10 +1344,10 @@ class SystemControllerTest {
                 .floor(7)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1380,10 +1384,10 @@ class SystemControllerTest {
                 .floor(7)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1420,10 +1424,10 @@ class SystemControllerTest {
                 .floor(7)
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(patch(RestAPIRoutes.PARTIAL_UPDATE_ROOM, roomId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1486,10 +1490,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1534,10 +1538,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1583,10 +1587,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1632,10 +1636,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1681,10 +1685,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1730,10 +1734,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1779,10 +1783,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1828,10 +1832,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1877,10 +1881,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1926,10 +1930,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -1975,10 +1979,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2024,10 +2028,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2073,10 +2077,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2122,10 +2126,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2171,10 +2175,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2220,10 +2224,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2269,10 +2273,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2310,7 +2314,7 @@ class SystemControllerTest {
                 .idCardNo("3232 3232 3232 3232")
                 .idCardValidity(LocalDate.now().plusYears(10))
                 .idCardIssueAuthority("BGN")
-                .idCardIssueDate(null)
+                .idCardIssueDate(LocalDate.now().minusYears(1))
                 .build();
 
         RegisterGuestRequest request = RegisterGuestRequest
@@ -2318,10 +2322,10 @@ class SystemControllerTest {
                 .guests(List.of(guest))
                 .build();
 
-        when(authenticationClient.loadUserDetails(any(LoadUserDetailsInput.class)))
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
                 .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
         when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
-        when(authenticationClient.validateToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
 
         mockMvc.perform(post(RestAPIRoutes.REGISTER_VISITOR, bookingId)
                         .header("Authorization", "Bearer " + accessToken)
@@ -2343,7 +2347,7 @@ class SystemControllerTest {
                 .idCardNo("3232 3232 3232 3232")
                 .idCardValidity(LocalDate.now().plusYears(10))
                 .idCardIssueAuthority("BGN")
-                .idCardIssueDate(null)
+                .idCardIssueDate(LocalDate.now().minusYears(1))
                 .build();
 
         RegisterGuestRequest request = RegisterGuestRequest
@@ -2356,6 +2360,63 @@ class SystemControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRespondWithOKAndGuestReportsWhenSearchingGuests() throws Exception {
+        GetGuestReportRequest request = GetGuestReportRequest
+                .builder()
+                .startDate(LocalDateTime.now().plusMonths(2))
+                .firstName("George")
+                .lastName("Russell")
+                .build();
+
+        String accessToken = "token";
+
+        User userDetails = (User) User.withUsername("domino222")
+                .password("password")
+                .authorities("ROLE_ADMIN")
+                .build();
+
+        GetUsernameFromTokenOutput getUsernameFromTokenOutput = GetUsernameFromTokenOutput.builder()
+                .username("domino222")
+                .build();
+
+        ValidateAccessTokenOutput validateAccessTokenOutput = ValidateAccessTokenOutput.builder()
+                .success(true)
+                .build();
+
+
+        GuestOutput guest = GuestOutput
+                .builder()
+                .firstName("George")
+                .lastName("Russell")
+                .userId(UUID.randomUUID())
+                .build();
+
+        GetGuestReportOutput expectedOutput = GetGuestReportOutput
+                .builder()
+                .guestsReports(List.of(guest))
+                .build();
+
+
+        when(authenticationClient.loadUser(any(LoadUserDetailsInput.class)))
+                .thenReturn(LoadUserDetailsOutput.builder().userDetails(userDetails).build());
+        when(authenticationClient.getUsernameFromToken(any())).thenReturn(getUsernameFromTokenOutput);
+        when(authenticationClient.validateAccessToken(any(ValidateAccessTokenInput.class))).thenReturn(validateAccessTokenOutput);
+        when(hotelClient.getGuestReport(request.getStartDate(), request.getEndDate(), request.getFirstName(),
+                request.getLastName(), UUID.randomUUID().toString(), request.getIdCardNo(), request.getIdCardValidity(),
+                request.getIdCardIssueAuthority(), request.getIdCardIssueDate(), request.getRoomNo()))
+                .thenReturn(expectedOutput);
+
+        mockMvc.perform(get(RestAPIRoutes.GET_VISITORS_REPORT)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guestss[0].firstName").value(request.getFirstName()))
+                .andExpect(jsonPath("$.guestss[0].lastName").value(request.getLastName()));
     }
 
 }
